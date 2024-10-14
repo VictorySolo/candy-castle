@@ -2,7 +2,7 @@
 Candy Castle is a fullstack web application for an online candy shop. It provides a secure platform for users to browse, order candies, and manage their accounts. Built with Node.js, Express.js, MongoDB, and Mongoose, the app ensures secure transactions using Bcrypt for password and payment card number hashing, and JWT for user authentication.
 
 ## Features
-- **Browse Candies**: Customer can view a wide variety of candies available in the shop
+- **Browse Candies**: User can view a wide variety of candies available in the shop
 - **User Authentication**: Secure registration and login system using JWT
 - **Payment Security**: Passwords and sensitive information are hashed using Bcrypt
 - **Order Management**: Users can add items to their cart and place orders
