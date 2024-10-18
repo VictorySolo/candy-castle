@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 // const Product = require("./product.js");  // -- possible doen't required
 
-// -- customerSchema
+// -- orderSchema
 const orderSchema = new mongoose.Schema(
   {
     date: {
