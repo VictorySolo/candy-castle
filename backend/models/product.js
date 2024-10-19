@@ -23,7 +23,8 @@ const productSchema = new Schema({
         required: [true, "Product energy is required"]
     },
     category:{
-        type: dataType.Category, 
+        type: Schema.Types.ObjectId,
+        ref: "Category", 
         required: [true, "Product category is required"]
     },
     availability:{
