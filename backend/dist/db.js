@@ -20,4 +20,4 @@ const closeDB = async () => {
   console.log("MongoDB connection closed")
 }
 
-module.exports = connectDB
+module.exports = {connectDB, closeDB}
