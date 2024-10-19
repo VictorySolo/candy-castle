@@ -97,8 +97,5 @@ const customerSchema = new mongoose.Schema(
 const Customer = mongoose.model("Customer", customerSchema);
 
 // -- export DB model
-<<<<<<< .merge_file_bWZJFU
 module.exports = Customer;
-=======
 module.exports = Customer;
->>>>>>> .merge_file_2mF5Yt
