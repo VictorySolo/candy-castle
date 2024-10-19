@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 // const Product = require("./product.js");  // -- possible doen't required
+// const Customer = require("./customer.js");  // -- possible doen't required
 
 // -- orderSchema
-const orderSchema = new mongoose.Schema(
+const reviewSchema = new mongoose.Schema(
   {
     date: {
       type: Date,
+      default: Date.now,
       required: true,
     },
     products: [
@@ -14,14 +16,20 @@ const orderSchema = new mongoose.Schema(
         ref: "Product", // connection with Product module of productSchema
       },
     ],
-    deliveryAddress: {
+    comment: {
       type: String,
       required: true,
       //   lowercase: true,
     },
-    price: {
+    rating: {
       type: Number,
       required: true,
+      min: [1, "Must be at least 1 or more, you entered {VALUE}"],
+      max: [5, "Must be at most 5 or less, you entered {VALUE}"],
+    },
+    customer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer", // connection with Customer module of customerSchema
     },
   },
   {
@@ -35,7 +43,7 @@ const orderSchema = new mongoose.Schema(
 );
 
 // -- creating mongoose model
-const Order = mongoose.model("Order", orderSchema);
+const Review = mongoose.model("Review", orderSchema);
 
 // -- export DB model
-module.exports = Order;
+module.exports = Review;
