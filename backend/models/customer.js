@@ -14,13 +14,13 @@ const customerSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
-      required: true,
+      required: [true, "First name is required"],
       // lowercase: true,
       trim: true,
     },
     lastName: {
       type: String,
-      required: true,
+      required: [true, "Last name is required"],
       // lowercase: true,
       trim: true,
     },
@@ -49,7 +49,7 @@ const customerSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      required: true,
+      required: [true, "Age is required"],
       min: [1, "Must be at least 1 or more, you entered {VALUE}"],
       default: 1,
 
@@ -62,7 +62,7 @@ const customerSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: true,
+      required: [true, "Phone number is required"],
       // Custom validation function
       validate: {
         validator: function (value) {
@@ -98,4 +98,7 @@ const Customer = mongoose.model("Customer", customerSchema);
 
 // -- export DB model
 module.exports = Customer;
+<<<<<<< HEAD
 module.exports = Customer;
+=======
+>>>>>>> 12-customer-controller
