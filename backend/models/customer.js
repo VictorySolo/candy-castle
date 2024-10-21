@@ -98,7 +98,3 @@ const Customer = mongoose.model("Customer", customerSchema);
 
 // -- export DB model
 module.exports = Customer;
-<<<<<<< HEAD
-module.exports = Customer;
-=======
->>>>>>> 12-customer-controller
