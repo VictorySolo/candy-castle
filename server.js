@@ -8,8 +8,6 @@ const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bycript");
 
-const PORT = process.env.PORT || 3000;
-
 // -- middleware
 const app = express();
 app.use(express.json());
@@ -70,7 +68,12 @@ app.use(errorLogger);
 
 // };
 
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-  // possibly need to add try catch
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, (err) => {
+  if (err) {
+    console.error("Error while listening", err.message);
+  } else {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  }
 });
