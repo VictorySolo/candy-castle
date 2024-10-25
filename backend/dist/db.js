@@ -1,23 +1,26 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+require("dotenv").config();
 
-//  DB connector
+// -- DB connector
 const connectDB = async () => {
   try {
     await mongoose.connect(
-      process.env.JWT_SECRET,
-      {dbName: db}
-    ) 
-    console.log("MongoDB connected succesfully")
+      process.env.MONGODB_URI,
+      { serverSelectionTimeoutMS: 5000 } // every db operation timeout 5sec
+      // {dbName: db}
+    );
+    console.log("MongoDB connected succesfully");
+    return true;
   } catch (err) {
-    console.error('MongoDB connection error:', err)
-    process.exit(1)
+    console.error("MongoDB connection error:", err);
+    return false;
   }
-}
+};
 
-// DB connaction close
+// -- DB connection close
 const closeDB = async () => {
-  await mongoose.connection.close()
-  console.log("MongoDB connection closed")
-}
+  await mongoose.connection.close();
+  console.log("MongoDB connection closed");
+};
 
-module.exports = {connectDB, closeDB}
+module.exports = { connectDB, closeDB };

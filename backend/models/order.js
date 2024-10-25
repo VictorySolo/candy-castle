@@ -10,8 +10,15 @@ const orderSchema = new mongoose.Schema(
     },
     products: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product", // connection with Product module of productSchema
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product", // connection with Product module of productSchema
+        },
+        amount: {
+          type: Number,
+          required: true,
+          min: 1, // Ensure at least one product is ordered
+        },
       },
     ],
     deliveryAddress: {

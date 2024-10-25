@@ -10,12 +10,11 @@ const reviewSchema = new mongoose.Schema(
       default: Date.now,
       required: true,
     },
-    products: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product", // connection with Product module of productSchema
-      },
-    ],
+    products: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product", // connection with Product module of productSchema
+    },
+
     comment: {
       type: String,
       required: true,
@@ -43,7 +42,7 @@ const reviewSchema = new mongoose.Schema(
 );
 
 // -- creating mongoose model
-const Review = mongoose.model("Review", orderSchema);
+const Review = mongoose.model("Review", reviewSchema);
 
 // -- export DB model
 module.exports = Review;

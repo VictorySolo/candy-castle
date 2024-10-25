@@ -1,12 +1,15 @@
 // -- import modules
 const express = require("express");
-const mongoose = require("mongoose");
 const http = require("http");
 require("dotenv").config();
 const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bycript");
+
+// -- import modules from my files
+const inputTestData = require("./service/inputTestData"); // import filling the DB function
+const connectDB = require("./dist/db"); // Import the connectDB function
 
 // -- middleware
 const app = express();
@@ -19,12 +22,6 @@ app.use(
   })
 );
 app.use(helmet());
-
-// - for initit create
-// const Categorie = require("./backend/models/categorie");
-// const Cutomer = require("./backend/models/customer");
-// const Product = require("./backend/models/product");
-// const Order = require("./backend/models/order");
 
 // - for routers
 const categoriesRouter = require("./backend/routes/categorieRouter");
@@ -42,38 +39,28 @@ app.use("/orders", ordersRouter);
 
 app.use(errorLogger);
 
-// -- possible automatic entering data
-// const enterData = async () => {
-//   const customer1 = await Customer.create({
-//     name: "Dor",
-//     email: "dor@gmail.com",
-//     password: "dorb1",
-//   });
 
-//   const genre1 = await Genre.create({ genreName: "Fantasy" });
 
-//   const movie1 = await Movie.create({
-//     title: "The Hobbit",
-//     description: "A journey through Middle Earth.",
-//     releaseYear: 2012,
-//   });
+const startServer = async () => {
+  // -- Calling connectDB and checking if the DB is connected
+  if (await connectDB()) {
+    await inputTestData(); // Call the function to input test data
+    console.log("Test data inputted");
 
-//   await movie1.addGenre(genre1);
+    // -- setting up PORT
+    const PORT = process.env.PORT || 3000;
 
-//   await Rental.create({
-//     rentalDate: new Date(),
-//     CustomerId: customer1.id,
-//     MovieId: movie1.id,
-//   });
-
-// };
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, (err) => {
-  if (err) {
-    console.error("Error while listening", err.message);
+    // -- starting server listener on PORT
+    app.listen(PORT, (err) => {
+      if (err) {
+        console.error("Error while listening", err.message);
+      } else {
+        console.log(`Server is running on http://localhost:${PORT}`);
+      }
+    });
   } else {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.error("Can't start the app because the DB is unavailable");
   }
-});
+};
+
+startServer();
