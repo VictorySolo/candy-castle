@@ -1,15 +1,15 @@
 // -- import modules
 const express = require("express");
 const http = require("http");
-require("dotenv").config();
+require("dotenv").config({ path: "./backend/dist/.env" });
 const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
-const bcrypt = require("bycript");
+// const bcrypt = require("bcrypt");
 
 // -- import modules from my files
-const inputTestData = require("./service/inputTestData"); // import filling the DB function
-const connectDB = require("./dist/db"); // Import the connectDB function
+const inputTestData = require("./backend/services/inputTestData"); // import filling the DB function
+const { connectDB } = require("./backend/dist/db"); // Import the connectDB function
 
 // -- middleware
 const app = express();
@@ -24,7 +24,7 @@ app.use(
 app.use(helmet());
 
 // - for routers
-const categoriesRouter = require("./backend/routes/categorieRouter");
+const categoriesRouter = require("./backend/routes/categoriesRouter");
 const customersRouter = require("./backend/routes/customersRouter");
 const productsRouter = require("./backend/routes/productsRouter");
 const ordersRouter = require("./backend/routes/ordersRouter");
@@ -39,13 +39,10 @@ app.use("/orders", ordersRouter);
 
 app.use(errorLogger);
 
-
-
 const startServer = async () => {
   // -- Calling connectDB and checking if the DB is connected
   if (await connectDB()) {
     await inputTestData(); // Call the function to input test data
-    console.log("Test data inputted");
 
     // -- setting up PORT
     const PORT = process.env.PORT || 3000;
@@ -59,7 +56,7 @@ const startServer = async () => {
       }
     });
   } else {
-    console.error("Can't start the app because the DB is unavailable");
+    console.log("Can't start the app because the DB is unavailable");
   }
 };
 
