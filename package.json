@@ -1,0 +1,25 @@
+{
+  "name": "candy-castle",
+  "version": "1.0.0",
+  "description": "Candy Castle is a fullstack web application for an online candy shop. It provides a secure platform for users to browse, order candies, and manage their accounts. Built with Node.js, Express.js, MongoDB, and Mongoose, the app ensures secure transactions using Bcrypt for password and payment card number hashing, and JWT for user authentication.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "helmet": "^8.0.0",
+    "http-server": "^14.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.7.3",
+    "socket.io": "^4.8.1"
+  }
+}
