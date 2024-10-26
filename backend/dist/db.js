@@ -1,4 +1,5 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 //  DB connector
 const connectDB = async (db) => {
@@ -9,15 +10,15 @@ const connectDB = async (db) => {
     ) 
     console.log("MongoDB connected succesfully")
   } catch (err) {
-    console.error('MongoDB connection error:', err)
-    process.exit(1)
+    console.error("MongoDB connection error:", err);
+    return false;
   }
-}
+};
 
-// DB connaction close
+// -- DB connection close
 const closeDB = async () => {
-  await mongoose.connection.close()
-  console.log("MongoDB connection closed")
-}
+  await mongoose.connection.close();
+  console.log("MongoDB connection closed");
+};
 
-module.exports = {connectDB, closeDB}
+module.exports = { connectDB, closeDB };
