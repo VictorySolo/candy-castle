@@ -3,16 +3,16 @@ const mongoose = require("mongoose");
 // -- adding bcrypt for password hashing
 const bcrypt = require("bcrypt");
 // -- dotenv for environment variables import
-require("dotenv").config();
+require("dotenv").config({ path: './backend/dist/.env' });
 // -- bcrypt salt rounds for password hashing
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
 
 // - import DB modules
-const Category = require("./backend/models/categorie");
-const Customer = require("./backend/models/customer");
-const Product = require("./backend/models/product");
-const Order = require("./backend/models/order");
-const Review = require("./backend/models/review");
+const Category = require("../models/category");
+const Customer = require("../models/customer");
+const Product = require("../models/product");
+const Order = require("../models/order");
+const Review = require("../models/review");
 
 // -- getting a randome date fo the last 3 months to add to each test order
 const getRandomDateInLast3Months = async () => {

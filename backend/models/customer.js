@@ -4,8 +4,6 @@ const mongoose = require("mongoose");
 // -- define regex validation pattern for emai, password and phone number
 const validationPatterns = {
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Basic email format
-  strongPassword:
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, // Strong password pattern
   phone: /^05\d{8}$/, // phone number 05xxxxxxxx
 };
 
@@ -29,6 +27,7 @@ const customerSchema = new mongoose.Schema(
       required: [true, "Email is required"],
       unique: true,
       lowercase: true,
+      trim: true,
       validate: {
         validator: function (value) {
           return validationPatterns.email.test(value);
@@ -38,14 +37,9 @@ const customerSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      trim: true,
       required: [true, "Password is required"],
-      validate: {
-        validator: function (value) {
-          return validationPatterns.strongPassword.test(value);
-        },
-        message:
-          "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character (@$!%*?&).",
-      },
+      // we can't use regex password validation here. We store a hash not a password itself
     },
     age: {
       type: Number,
@@ -62,6 +56,7 @@ const customerSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
+      trim: true,
       required: [true, "Phone number is required"],
       // Custom validation function
       validate: {
@@ -72,10 +67,10 @@ const customerSchema = new mongoose.Schema(
       },
     },
     deliveryAddress: {
-        type: String,
-        // lowercase: true,
-        trim: true,
-      },
+      type: String,
+      // lowercase: true,
+      trim: true,
+    },
     orders: [
       {
         type: mongoose.Schema.Types.ObjectId,
