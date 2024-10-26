@@ -42,7 +42,8 @@ app.use(errorLogger);
 const startServer = async () => {
   // -- Calling connectDB and checking if the DB is connected
   if (await connectDB()) {
-    await inputTestData(); // Call the function to input test data
+    // -- Call the function to input test data
+    // await inputTestData(); 
 
     // -- setting up PORT
     const PORT = process.env.PORT || 3000;
