@@ -1,37 +1,40 @@
 const Product = require('../models/product')
-const Review = require('../models/review')
+const Review = require('../models/review');
+const HttpError = require('../services/HttpError');
 
-//GET - get all products by category or name
-const getAllProducts = async (req, res) => {
+
+//GET - get all products 
+const gettingAll = async (req, res, next) => {
     try {
-        const { category, name, minPrice, maxPrice } = req.query
-
-        // Build the query object dynamically based on the query params
-        const query = {}
-
-        if (category) {
-            query.category = category // Filter by category ID
+        const products = await Product.findAll()
+        if (!products || products.length === 0) {
+            return next(new HttpError("No products found", 404))
         }
-
-        if (name) {
-            query.name = new RegExp(name, 'i')
-        }
-
-        // Filter by price range
-        if (minPrice && maxPrice) {
-            query.price = { $gte: minPrice, $lte: maxPrice }; // Price between minPrice and maxPrice
-        } else if (minPrice) {
-            query.price = { $gte: minPrice }; // Products with price greater than or equal to minPrice
-        } else if (maxPrice) {
-            query.price = { $lte: maxPrice }; // Products with price less than or equal to maxPrice
-        }
-
-        const products = await Product.find().populate('category'); // Populate category reference
         res.status(200).json(products);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching product', error: error.message })
+    } catch (err) {
+        next(err)
     }
 };
+
+// GET - Get all products by category 
+const allProductsByCategory = async (req, res) => {
+    try {
+        const categoryName = req.params.name; // Get category name from URL parameters
+
+        // Find the category by name
+        const category = await Category.findOne({ name: categoryName })
+
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+        // Find products that belong to the found category
+        const products = await Product.find({ category: category._id }).select('name description ptice')
+
+        res.status(200).json(products);
+    } catch (err) {
+        next(err)
+    }
+}
 
 // POST - Create a new product
 const createProduct = async (req, res) => {
@@ -39,8 +42,8 @@ const createProduct = async (req, res) => {
         const newProduct = new Product(req.body); // req.body contains product details
         await newProduct.save();
         res.status(201).json({ message: 'Product created successfully', product: newProduct });
-    } catch (error) {
-        res.status(400).json({ message: 'Error creating product', error: error.message });
+    } catch (err) {
+        next(err)
     }
 };
 
@@ -51,8 +54,8 @@ const getProductById = async (req, res) => {
 
         if (!product) return res.status(404).json({ message: 'Product not found' });
         res.status(200).json(product);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching product', error: error.message });
+    } catch (err) {
+        next(err)
     }
 };
 
@@ -66,8 +69,8 @@ const updateProduct = async (req, res) => {
 
         if (!updatedProduct) return res.status(404).json({ message: 'Product not found' });
         res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
-    } catch (error) {
-        res.status(400).json({ message: 'Error updating product', error: error.message });
+    } catch (err) {
+        next(err)
     }
 };
 
@@ -79,12 +82,12 @@ const deleteProductById = async (req, res) => {
         if (!deletedProduct) return res.status(404).json({ message: 'Product not found' });
         res.status(200).json({ message: 'Product deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting product', error: error.message });
+        next(err)
     }
 };
 
 //GET - get all reviews by product ID or name
-const getAllReviews = async (req, res) => {
+const allReviews = async (req, res) => {
     try {
         const { id, name } = req.params; // Get product ID or name from URL parameters
 
@@ -92,8 +95,7 @@ const getAllReviews = async (req, res) => {
 
         if (id) {
             product = await Product.findById(id)
-        }
-        if (name) {
+        } else if (name) {
             product = await Product.findOne({ name: new RegExp(name, 'i') })
         }
 
@@ -109,16 +111,17 @@ const getAllReviews = async (req, res) => {
         }
 
         res.status(200).json(reviews);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching reviews', error: error.message });
+    } catch (err) {
+        next(err)
     }
 };
 
 module.exports = {
-    getAllProducts,
+    gettingAll,
+    allProductsByCategory,
     createProduct,
     getProductById,
     updateProduct,
     deleteProductById,
-    getAllReviews
+    allReviews
 }
