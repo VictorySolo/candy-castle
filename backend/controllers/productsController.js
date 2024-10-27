@@ -3,7 +3,7 @@ const Review = require('../models/review');
 const HttpError = require('../services/HttpError');
 
 
-//GET - get all products by category or name
+//GET - get all products 
 const gettingAll = async (req, res, next) => {
     try {
         const products = await Product.findAll()
@@ -16,7 +16,7 @@ const gettingAll = async (req, res, next) => {
     }
 };
 
-// GET - Get all products by category name or ID
+// GET - Get all products by category 
 const allProductsByCategory = async (req, res) => {
     try {
         const categoryName = req.params.name; // Get category name from URL parameters
