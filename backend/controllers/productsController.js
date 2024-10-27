@@ -1,6 +1,7 @@
 const Product = require('../models/product')
 const Review = require('../models/review');
-const HttpError = require('../services/HttpError');
+const Category = require('../models/category')
+const HttpError = require('../services/HttpError')
 
 
 //GET - get all products 
@@ -17,7 +18,7 @@ const gettingAll = async (req, res, next) => {
 };
 
 // GET - Get all products by category 
-const allProductsByCategory = async (req, res) => {
+const allProductsByCategory = async (req, res, next) => {
     try {
         const categoryName = req.params.name; // Get category name from URL parameters
 
@@ -37,7 +38,7 @@ const allProductsByCategory = async (req, res) => {
 }
 
 // POST - Create a new product
-const createProduct = async (req, res) => {
+const createProduct = async (req, res, next) => {
     try {
         const newProduct = new Product(req.body); // req.body contains product details
         await newProduct.save();
@@ -48,7 +49,7 @@ const createProduct = async (req, res) => {
 };
 
 //GET - get product by ID
-const getProductById = async (req, res) => {
+const getProductById = async (req, res, next) => {
     try {
         const product = await Product.findById(req.params.id).populate('category');
 
@@ -60,7 +61,7 @@ const getProductById = async (req, res) => {
 };
 
 // PUT - update product by ID
-const updateProduct = async (req, res) => {
+const updateProduct = async (req, res, next) => {
     try {
         const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
             new: true, // Return the updated product
@@ -75,19 +76,19 @@ const updateProduct = async (req, res) => {
 };
 
 // DELETE - remove product by ID
-const deleteProductById = async (req, res) => {
+const deleteProductById = async (req, res, next) => {
     try {
         const deletedProduct = await Product.findByIdAndDelete(req.params.id);
 
         if (!deletedProduct) return res.status(404).json({ message: 'Product not found' });
         res.status(200).json({ message: 'Product deleted successfully' });
-    } catch (error) {
+    } catch (err) {
         next(err)
     }
 };
 
 //GET - get all reviews by product ID or name
-const allReviews = async (req, res) => {
+const allReviews = async (req, res, next) => {
     try {
         const { id, name } = req.params; // Get product ID or name from URL parameters
 
