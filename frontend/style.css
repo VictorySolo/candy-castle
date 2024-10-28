@@ -1,0 +1,211 @@
+* {
+    margin: 0;
+    padding: 0;
+   max-width: 100%; 
+}
+
+img {
+    max-width: 100%;          /* Ensures images don't exceed their container width */
+    height: auto;             /* Maintains aspect ratio */
+    display: block;           /* Removes bottom space under images */
+}
+#logo{
+    display:inline-flex;
+}
+#logo img {
+    max-width: 5rem;         /* Sets a maximum width for the logo */
+    margin-right: 2rem;
+    border-radius: 3rem;           /* Adds some space around the logo */
+    cursor: pointer;          /* Changes cursor to pointer on hover */
+}
+#cart{
+    display: inline-flex;                  /* Use flexbox for alignment */
+    align-items: center;            /* Center items vertically */ 
+}
+#cart img {
+    width: 30px;         /* Sets a maximum width for the logo */
+    border-radius: 3rem;           /* Adds some space around the logo */
+    cursor: pointer;          /* Changes cursor to pointer on hover */
+}
+#cart-count {
+    font-size: 16px;                /* Font size for cart count */
+    font-weight: bold;              /* Bold text for emphasis */
+}
+#name {
+    color: rgb(238, 1, 159);
+    font-size: 1.5rem;
+}
+
+#contacts{
+  color:#6666;
+}
+/* General settings for all text */
+body {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; /* Sets a modern, sans-serif font */
+    color: #333;                               /* Dark gray for readability */
+    line-height: 1.6;                          /* Improves readability */
+    margin: 0 ;
+    padding: 5px;
+    background-color: #f9f9f9;                 /* Light background to contrast text */
+}
+
+/* Header and Navigation*/
+header{
+    background-color: rgb(252, 236, 252);         /* Dark background for contrast */  
+    color: white;                    /* White text for readability */
+    width: 100%;                    
+    position: relative;           
+    bottom: 0;    
+}
+
+main{
+    background-color: white;         /* Dark background for contrast */  
+    color: #444;                    /* White text for readability */
+    width: 100%;                    
+    position: relative;           
+    bottom: 0;    
+}
+
+#main-content{
+    display: flexbox;
+    justify-content: center;
+    text-align: center;
+}
+#main-content h1{
+    justify-content: space-between;
+}
+#main-content img{
+    display: inline-block;
+    justify-content: center;
+    max-width: 20rem;         /* Sets a maximum width for the logo */
+    margin-right: 2rem;
+    border-radius: 1rem;           /* Adds some space around the logo */
+    cursor: pointer;          /* Changes cursor to pointer on hover */
+}
+#add-to-cart-icon{
+    width: 2rem;
+    height: 2rem;         /* Sets a maximum width for the logo */
+    margin-right: 1rem;
+    border-radius: 3rem;           /* Adds some space around the logo */
+    cursor: pointer; 
+}
+
+#cart-add {
+    max-width: 30%;
+    padding-left: 28rem;
+    display: flex;
+    justify-content: space-between;
+    
+}
+#header {
+    display: flex;                  /* Use flexbox for horizontal alignment */
+    justify-content: space-between; /* Space out items evenly */
+    align-items: center;            /* Center items vertically */
+    padding: 5px;
+    width:auto;
+}
+
+header h1 {
+    font-size: 2em;
+    color: #9a6dfd;                            /* Candy-inspired color */
+}
+
+#navigation ul {
+    list-style-type: none;
+}
+
+#navigation ul li {
+    display: inline;
+    margin-right: 20px;
+}
+
+#navigation a {
+    text-decoration: none;
+    color: #9a6dfd;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+#navigation a:hover {
+    color: darkmagenta;                            /* Darker shade on hover */
+}
+
+/* Product Name and Description */
+#product-name {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #444;                               /* Darker gray for product titles */
+    margin-top: 0.5em;
+}
+
+#product-description {
+    font-size: 1em;
+    color: #666;                               /* Medium gray for descriptions */
+    margin-top: 0.3em;
+    margin-bottom: 1em;
+}
+
+/* Rating and Price */
+#product-rating span {
+    color: #f2ff00;                            /* Star color */
+    font-size: 1.5em;
+}
+
+#product-price {
+    font-size: 1.2em;
+    color: #9a6dfd;
+    font-weight: bold;
+}
+
+/* Footer */
+
+footer {
+    background-color: rgb(231, 211, 231);         /* Dark background for contrast */
+    color: #fff;                    /* White text for readability */
+    padding: 10px;                  /* Padding for space inside the footer */
+    width: 100%;                    /* Full width */
+    position: relative;             /* Positions footer relative to the body */
+    bottom: 0;                      /* Sticks the footer to the bottom */
+}
+
+#footer {
+    display: flex;                  /* Use flexbox for horizontal alignment */
+    justify-content: space-between; /* Space out items evenly */
+    align-items: center;            /* Center items vertically */
+}
+
+#footer-contact {
+    flex: 1;                        /* Allow this section to take available space */
+}
+
+#footer-copyright {
+    text-align: center;             /* Right-align copyright text */
+    margin-left: 20px;             /* Add some space from the left */
+}
+
+footer h3 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 0.5em;
+}
+
+footer p {
+    font-size: 0.9em;
+    color: #777;                               /* Light gray for footer */
+}
+
+/* Buttons and Icons */
+button, .add-to-cart-icon {
+    font-size: 1em;
+    color: #fff;
+    background-color: #ff6b6b;
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, .add-to-cart-icon:hover {
+    background-color: #b097fa;                 /* Darker shade on hover */
+}
