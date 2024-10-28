@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 // -- adding bcrypt for password hashing
 const bcrypt = require("bcrypt");
 // -- dotenv for environment variables import
-require("dotenv").config({ path: './backend/dist/.env' });
+require("dotenv").config({ path: "./backend/dist/.env" });
 // -- bcrypt salt rounds for password hashing
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
 
@@ -392,22 +392,22 @@ const inputTestData = async () => {
         const product = products.find((p) => p._id.equals(item.product));
         return acc + product.price * item.amount;
       }, 0);
-      // -- creating an order model
-      const order = new Order({
+      // -- creating an order in the DB
+      const order = await Order.create({
         date: await getRandomDateInLast3Months(),
         products: productsWithAmount,
         deliveryAddress: customer.deliveryAddress,
         price: totalPrice,
+        customer: customer._id,
       });
+
+      // -- saving order ID to the customer as a reference and saving it to the DB
+      await Customer.findByIdAndUpdate(customer._id, {
+        $push: { orders: order._id },
+      });
+
       // -- saving current order to the array to save in the DB later
       orders.push(order);
-      // -- saving order ID to the customer as a reference and saving it to the DB
-      customer.orders.push(order._id);
-      await customer.save();
-    }
-    // -- saving all the test orders to the DB
-    for (const order of orders) {
-      await order.save();
     }
 
     console.log("Test orders inserted successfully");
