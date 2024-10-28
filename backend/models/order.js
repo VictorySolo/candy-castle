@@ -12,7 +12,7 @@ const orderSchema = new mongoose.Schema(
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Product", // connection with Product module of productSchema
+          ref: "Product", // connection with Product model of productSchema
         },
         amount: {
           type: Number,
@@ -24,11 +24,16 @@ const orderSchema = new mongoose.Schema(
     deliveryAddress: {
       type: String,
       required: true,
+      trim: true,
       //   lowercase: true,
     },
     price: {
       type: Number,
       required: true,
+    },
+    customer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer", // connection with Customer model of customerSchema
     },
   },
   {
