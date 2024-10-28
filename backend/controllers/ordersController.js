@@ -53,15 +53,16 @@ const createNewOrder = async (req, res) => {
 // -- canceling an order by ID
 const cancelOrder = async (req, res) => {
   try {
-    // -- getting parameters from request
-    const { orderId, customerId } = req.body;
-    // -- lloking for the order by ID
+    // -- getting orderId from request
+    const orderId = req.params.id
+    // -- looking for the order by ID
     const order = await Order.findById(orderId);
     // -- if order doesn't exist send a message to client
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
-
+    // -- getting customerId from the order
+    const customerId = order.customer;
     // -- removing the order from the customer's order list
     await Customer.findByIdAndUpdate(customerId, {
       $pull: { orders: orderId },
