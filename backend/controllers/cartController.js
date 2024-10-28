@@ -78,7 +78,7 @@ const decreaseItemAmountInCart = async (req, res) => {
 const getCartItems = async (req, res) => {
   try {
     // -- getting customerId from request
-    const { customerId } = req.body;
+    const customerId = req.params.id;
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId }).populate("items.productId");
     // -- if the cart exists getting sending all the cart items to the client
@@ -128,7 +128,7 @@ const deleteItemFromCart = async (req, res) => {
 const resetCart = async (req, res) => {
   try {
     // -- getting customerId from request
-    const { customerId } = req.body;
+    const customerId = req.params.id;
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId });
     // -- if the cart exists deleting all the items ftom it
@@ -153,7 +153,7 @@ const resetCart = async (req, res) => {
 const calculateTotalPrice = async (req, res) => {
   try {
     // -- getting customerId from request
-    const { customerId } = req.body;
+    const customerId = req.params.id;
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId });
     // -- if the cart exists calculating its total price
