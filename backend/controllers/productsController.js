@@ -29,7 +29,7 @@ const allProductsByCategory = async (req, res, next) => {
             return res.status(404).json({ message: 'Category not found' });
         }
         // Find products that belong to the found category
-        const products = await Product.find({ category: category._id }).select('name description ptice')
+        const products = await Product.find({ category: category._id }).select('name description price')
 
         res.status(200).json(products);
     } catch (err) {
