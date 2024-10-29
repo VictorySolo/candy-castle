@@ -3,10 +3,24 @@ const Product = require("../models/product");
 const Cart = require("../models/cart");
 
 // Add an item to the cart
-const addItemToCart = async (req, res) => {
+const addItemToCart = async (req, res, next) => {
   try {
     // -- getting parameters from request
     const { customerId, productId, amount } = req.body;
+    // -- checking if all necessary parameters exist
+    if (!customerId || !productId || amount === undefined) {
+      return res.status(400).json({ message: "Not enough parameters" });
+    }
+    // -- getting the product details to check the available amount
+    const product = await Product.findById(productId);
+    // -- checking if product is not found (not nessesary)
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    // -- checking if requested amount exceeds available product amount
+    if (amount > product.amount) {
+      return res.status(400).json({ message: `Not enough ${product.name}` });
+    }
     // -- getting existing cart object for current customer
     let cart = await Cart.findOne({ customerId });
     // -- creating a new Cart object if the cart for the current customer is empty
@@ -26,8 +40,26 @@ const addItemToCart = async (req, res) => {
     }
     // -- saving the cart to the DB
     await cart.save();
+    // -- calculating the total price
+    const totalPrice = await cart.calculateTotalPrice();
+    // -- formatting the response
+    const responseCart = {
+      customerId: cart.customerId,
+      items: await Promise.all(
+        cart.items.map(async (item) => {
+          const product = await Product.findById(item.productId);
+          return {
+            id: product._id,
+            name: product.name,
+            price: product.price,
+            amount: item.amount,
+          };
+        })
+      ),
+      totalPrice: totalPrice,
+    };
     // -- OK response to the client
-    res.status(200).json({ message: "Item added to cart", cart });
+    res.status(200).json({ message: "Item added to cart", responseCart });
   } catch (error) {
     console.log("Error adding item to cart (addItemToCart)");
     // -- handling the error
@@ -36,10 +68,16 @@ const addItemToCart = async (req, res) => {
 };
 
 // -- decreasing the amount of a product in the cart by 1
-const decreaseItemAmountInCart = async (req, res) => {
+const decreaseItemAmountInCart = async (req, res, next) => {
   try {
+    // -- getting customerId from request
+    const customerId = req.params.id;
     // -- getting parameters from request
-    const { customerId, productId } = req.body;
+    const { productId } = req.body;
+    // -- checking if all necessary parameters are present
+    if (!productId) {
+      return res.status(400).json({ message: "Not enough parameters" });
+    }
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId });
     // -- if the cart exists getting the current product from the cart
@@ -53,17 +91,37 @@ const decreaseItemAmountInCart = async (req, res) => {
         cart.items[existingItemIndex].amount -= 1;
         // --saving the cart to the DB
         await cart.save();
+        // -- calculating the total price
+        const totalPrice = await cart.calculateTotalPrice();
+
+        // -- formatting the response
+        const responseCart = {
+          customerId: cart.customerId,
+          items: await Promise.all(
+            cart.items.map(async (item) => {
+              const product = await Product.findById(item.productId);
+              return {
+                id: product._id,
+                name: product.name,
+                price: product.price,
+                amount: item.amount,
+              };
+            })
+          ),
+          totalPrice: totalPrice,
+        };
         // -- OK response to the client
-        res
-          .status(200)
-          .json({ message: "Item amount decreased in cart", cart });
+        res.status(200).json({
+          message: "Item amount decreased in cart",
+          cart: responseCart,
+        });
       } else {
         // -- the amount can't be less than 1 response to the client
         res.status(400).json({ message: "Item amount cannot be less than 1" });
       }
     } else {
       // -- the cart is empty for this customer response to the client
-      res.status(404).json({ message: "Cart not found" });
+      res.status(404).json({ message: "Cart is empty" });
     }
   } catch (error) {
     console.log(
@@ -74,8 +132,62 @@ const decreaseItemAmountInCart = async (req, res) => {
   }
 };
 
+// -- updating the amount of a product in the cart
+const updateItemAmount = async (req, res, next) => {
+  try {
+    // -- getting parameters from request
+    const { customerId, productId, amount } = req.body;
+    // -- checking if all necessary parameters exist
+    if (!customerId || !productId || amount === undefined) {
+      return res.status(400).json({ message: "Not enough parameters" });
+    }
+    // -- getting the product details to check the available amount
+    const product = await Product.findById(productId);
+    // -- checking if product exists
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    // -- checking if the new amount is within the allowed range
+    if (amount < 1 || amount > product.amount) {
+      return res
+        .status(400)
+        .json({ message: `Amount must be between 1 and ${product.amount}` });
+    }
+    // -- updating the amount of the product and getting the updated cart object
+    const cart = await Cart.findOneAndUpdate(
+      { customerId, "items.productId": productId },
+      { $set: { "items.$.amount": amount } },
+      { new: true }
+    ).populate("items.productId");
+
+    // -- calculating the total price
+    const totalPrice = await cart.calculateTotalPrice();
+
+    // -- formatting the response
+    const responseCart = {
+      customerId: cart.customerId,
+      items: cart.items.map((item) => ({
+        id: item.productId._id,
+        name: item.productId.name,
+        price: item.productId.price,
+        amount: item.amount,
+      })),
+      totalPrice: totalPrice,
+    };
+
+    // -- OK response to the client
+    res
+      .status(200)
+      .json({ message: "Item amount updated in cart", cart: responseCart });
+  } catch (error) {
+    console.log("Error updating item amount in cart (updateItemAmount)");
+    // -- handling the error
+    next(error);
+  }
+};
+
 // -- getting all items in the cart
-const getCartItems = async (req, res) => {
+const getCartItems = async (req, res, next) => {
   try {
     // -- getting customerId from request
     const customerId = req.params.id;
@@ -83,12 +195,24 @@ const getCartItems = async (req, res) => {
     const cart = await Cart.findOne({ customerId }).populate("items.productId");
     // -- if the cart exists getting sending all the cart items to the client
     if (cart) {
-      res
-        .status(200)
-        .json({ message: "Cart items retrieved", items: cart.items });
+      const filteredItems = cart.items.map((item) => ({
+        id: item.productId._id,
+        name: item.productId.name,
+        price: item.productId.price,
+        amount: item.amount,
+      }));
+      // -- calculating the total price const
+      totalPrice = await cart.calculateTotalPrice();
+      // -- formatting the response
+      const responseCart = {
+        customerId: cart.customerId,
+        items: filteredItems,
+        totalPrice: totalPrice,
+      };
+      res.status(200).json(responseCart);
     } else {
       // -- the cart is empty response to the client
-      res.status(404).json({ message: "Cart not found" });
+      res.status(404).json({ message: "Cart is empty" });
     }
   } catch (error) {
     console.log("Error retrieving cart items (getCartItems)");
@@ -98,21 +222,44 @@ const getCartItems = async (req, res) => {
 };
 
 // -- deleting an item from the cart
-const deleteItemFromCart = async (req, res) => {
+const deleteItemFromCart = async (req, res, next) => {
   try {
     // -- getting parameters from request
     const { customerId, productId } = req.body;
-    // -- getting existing cart object for current customer
-    const cart = await Cart.findOne({ customerId });
+    // -- checking if all necessary parameters exist
+    if (!customerId || !productId) {
+      return res.status(400).json({ message: "Not enough parameters" });
+    }
+    // -- checking if the product exists
+    const product = await Product.findById(productId).catch(() => null);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    // -- updating the cart and filtering out the product
+    const cart = await Cart.findOneAndUpdate(
+      { customerId },
+      { $pull: { items: { productId } } },
+      { new: true }
+    ).populate("items.productId");
     // -- if the cart exists filter all the items without the current product
     if (cart) {
-      cart.items = cart.items.filter(
-        (item) => item.productId.toString() !== productId
-      );
-      // --saving the cart to the DB
-      await cart.save();
+      // -- calculating the total price
+      const totalPrice = await cart.calculateTotalPrice();
+      // -- formatting the response
+      const responseCart = {
+        customerId: cart.customerId,
+        items: cart.items.map((item) => ({
+          id: item.productId._id,
+          name: item.productId.name,
+          price: item.productId.price,
+          amount: item.amount,
+        })),
+        totalPrice: totalPrice,
+      };
       // -- OK response to the client
-      res.status(200).json({ message: "Item removed from cart", cart });
+      res
+        .status(200)
+        .json({ message: "Item removed from cart", cart: responseCart });
     } else {
       // -- the cart is empty for this customer response to the client
       res.status(404).json({ message: "Cart not found" });
@@ -125,7 +272,7 @@ const deleteItemFromCart = async (req, res) => {
 };
 
 // -- reseting the cart
-const resetCart = async (req, res) => {
+const resetCart = async (req, res, next) => {
   try {
     // -- getting customerId from request
     const customerId = req.params.id;
@@ -150,7 +297,7 @@ const resetCart = async (req, res) => {
 };
 
 // -- calculating the total price of items in the cart
-const calculateTotalPrice = async (req, res) => {
+const calculateTotalPrice = async (req, res, next) => {
   try {
     // -- getting customerId from request
     const customerId = req.params.id;
@@ -180,5 +327,6 @@ module.exports = {
   getCartItems,
   deleteItemFromCart,
   resetCart,
+  updateItemAmount,
   calculateTotalPrice,
 };
