@@ -8,17 +8,21 @@ const {
   getCartItems,
   deleteItemFromCart,
   resetCart,
+  updateItemAmount,
   calculateTotalPrice,
 } = require("../controllers/cartController");
 
 // -- setting up routers for cart
 router
   .route("/")
-  .get(getCartItems)
   .post(addItemToCart)
-  .put(decreaseItemAmountInCart)
+  .put(updateItemAmount)
   .delete(deleteItemFromCart);
-router.route("/:id").get(resetCart);
+router
+  .route("/:id")
+  .get(getCartItems)
+  .post(decreaseItemAmountInCart)
+  .put(resetCart);
 router.get("/:id/price", calculateTotalPrice);
 // -- exporting routes
 module.exports = router;
