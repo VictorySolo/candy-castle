@@ -1,7 +1,7 @@
 * {
     margin: 0;
     padding: 0;
-   max-width: 100%; 
+
 }
 
 img {
@@ -9,8 +9,8 @@ img {
     height: auto;             /* Maintains aspect ratio */
     display: block;           /* Removes bottom space under images */
 }
-#logo{
-    display:inline-flex;
+#logo {
+    display:flex;
 }
 #logo img {
     max-width: 5rem;         /* Sets a maximum width for the logo */
@@ -18,6 +18,7 @@ img {
     border-radius: 3rem;           /* Adds some space around the logo */
     cursor: pointer;          /* Changes cursor to pointer on hover */
 }
+
 #cart{
     display: inline-flex;                  /* Use flexbox for alignment */
     align-items: center;            /* Center items vertically */ 
@@ -63,7 +64,8 @@ main{
     color: #444;                    /* White text for readability */
     width: 100%;                    
     position: relative;           
-    bottom: 0;    
+    bottom: 0; 
+    padding: 2rem;   
 }
 
 #main-content{
@@ -85,18 +87,11 @@ main{
 #add-to-cart-icon{
     width: 2rem;
     height: 2rem;         /* Sets a maximum width for the logo */
-    margin-right: 1rem;
+    margin: 2rem;
     border-radius: 3rem;           /* Adds some space around the logo */
     cursor: pointer; 
 }
 
-#cart-add {
-    max-width: 30%;
-    padding-left: 28rem;
-    display: flex;
-    justify-content: space-between;
-    
-}
 #header {
     display: flex;                  /* Use flexbox for horizontal alignment */
     justify-content: space-between; /* Space out items evenly */
