@@ -1,6 +1,5 @@
 // -- import modules
 const Customer = require("../models/customer");
-const Order = require("../models/order");
 // -- extended Error class import
 const HttpError = require("../services/HttpError");
 // -- adding bcrypt for password hashing
@@ -16,13 +15,15 @@ const passwordREGX =
 // -- geting all customers function
 const gettingAll = async (req, res, next) => {
   try {
-    const customers = await Customer.findAll();
+    const customers = await Customer.find();
     if (!customers || customers.length === 0) {
       return next(new HttpError("No customers found", 404));
     }
     // -- returning a list of all customers
     res.status(200).json(customers);
   } catch (err) {
+    console.log("Error getting all customers (gettingAll)");
+    // -- handling the error
     next(err);
   }
 };
@@ -42,11 +43,13 @@ const creating = async (req, res, next) => {
     } = req.body;
     // -- checkong if all the required in customerSchema data exists
     if (!firstName || !lastName || !email || !password || !age || !phone) {
-      next(new HttpError("Not enough data for creating a customer", 400));
+      return next(
+        new HttpError("Not enough data for creating a customer", 400)
+      );
     }
     // -- password validation using regex
     if (!passwordREGX.test(password)) {
-      next(
+      return next(
         new HttpError("Validation error: password is not strong enough", 404)
       );
     }
@@ -63,11 +66,15 @@ const creating = async (req, res, next) => {
       password: newPassword,
     });
     if (!customer) {
-      next(new HttpError("A problem occured while creating a customer", 500));
+      return next(
+        new HttpError("A problem occured while creating a customer", 500)
+      );
     }
     // -- returning created customer data
     res.status(200).json(customer); // probably need to return only a OK messageS
   } catch (err) {
+    console.log("Error creating a customer (creating)");
+    // -- handling the error
     next(err);
   }
 };
@@ -85,6 +92,8 @@ const gettingById = async (req, res, next) => {
     // -- returning customer data
     res.status(200).json(customer);
   } catch (err) {
+    console.log("Error getting a customer by ID (gettingById)");
+    // -- handling the error
     next(err);
   }
 };
@@ -110,7 +119,7 @@ const updating = async (req, res, next) => {
     if (password) {
       // -- password validation using regex
       if (!passwordREGX.test(password)) {
-        next(
+        return next(
           new HttpError("Validation error: password is not strong enough", 404)
         );
       }
@@ -118,7 +127,7 @@ const updating = async (req, res, next) => {
       newPassword = await bcrypt.hash(password, saltRounds);
     }
     // -- updating customer's data in the database
-    await Customer.findByIdAndUpdate(
+    const updatedCustomer = await Customer.findByIdAndUpdate(
       id,
       {
         firstName,
@@ -131,6 +140,7 @@ const updating = async (req, res, next) => {
       },
       { new: true }
     );
+    // -- checking if customer was found and updated successfully
     if (!updatedCustomer) {
       return next(
         new HttpError("Customer was not found or update failed", 404)
@@ -139,6 +149,8 @@ const updating = async (req, res, next) => {
     // -- succesfully updated message
     res.status(200).json("Updated successfully");
   } catch (err) {
+    console.log("Error updating customer's data (updating)");
+    // -- handling the error
     next(err);
   }
 };
@@ -149,13 +161,15 @@ const deleting = async (req, res, next) => {
     // -- reading id from request
     const id = req.params.id;
     // -- deleting customer by id from the database
-    Customer.findByIdAndDelete(id);
+    const deletedCustomer = await Customer.findByIdAndDelete(id);
     if (!deletedCustomer) {
       return next(new HttpError("Customer not found or deleting failed", 404));
     }
     // -- succesfully deleted message
     res.status(200).json("Deleted successfully");
   } catch (err) {
+    console.log("Error deleting a customer (deleting)");
+    // -- handling the error
     next(err);
   }
 };
@@ -166,13 +180,38 @@ const allOrders = async (req, res, next) => {
     // -- reading id from request
     const id = req.params.id;
     // -- finding customer by id in the database and populate orders relation
-    const customer = await Customer.findById(id).populate("orders");
-    if (!customer) {
-      return next(new HttpError("Couldn't find customer", 404));
-    }
+
+    const customer = await Customer.findById(id)
+      .populate({
+        path: "orders",
+        populate: {
+          path: "products.product",
+          select: "name",
+        },
+      })
+      .select("firstName lastName email orders");
+
+    // Modify the orders to remove _id fields
+    const orders = customer.orders.map((order) => ({
+      date: order.date,
+      products: order.products.map((product) => ({
+        name: product.product.name,
+        amount: product.amount,
+      })),
+      deliveryAddress: order.deliveryAddress,
+      price: order.price,
+      customer: order.customer,
+    }));
+
     // -- returning customer's orders
-    res.status(200).json(customer.orders);
+    res.status(200).json({
+      customerName: `${customer.firstName} ${customer.lastName}`,
+      email: customer.email,
+      orders: orders,
+    });
   } catch (err) {
+    console.log("Error getting all orders of the customer (allOrders)");
+    // -- handling the error
     next(err);
   }
 };
