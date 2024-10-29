@@ -8,7 +8,7 @@ const {
     deleteProductById,
     allProductsByCategory,
     allReviews
-} = require('../controllers/productController');
+} = require('../controllers/productsController');
 
 router.route("/").get(gettingAll).post(createProduct)
 router.route("/:id").get(getProductById).put(updateProduct).delete(deleteProductById)
