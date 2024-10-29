@@ -6,7 +6,7 @@ const router = express.Router();
 const {
   createNewOrder,
   cancelOrder,
-} = require("../controllers/ordesController");
+} = require("../controllers/ordersController");
 
 // -- setting up routes for orders
 router.route("/").post(createNewOrder);
