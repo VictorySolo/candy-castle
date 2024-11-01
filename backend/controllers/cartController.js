@@ -1,6 +1,8 @@
 // -- import DB models
 const Product = require("../models/product");
 const Cart = require("../models/cart");
+// -- import mongoose
+const mongoose = require("mongoose");
 
 // Add an item to the cart
 const addItemToCart = async (req, res, next) => {
@@ -17,10 +19,7 @@ const addItemToCart = async (req, res, next) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    // -- checking if requested amount exceeds available product amount
-    if (amount > product.amount) {
-      return res.status(400).json({ message: `Not enough ${product.name}` });
-    }
+
     // -- getting existing cart object for current customer
     let cart = await Cart.findOne({ customerId });
     // -- creating a new Cart object if the cart for the current customer is empty
@@ -31,6 +30,15 @@ const addItemToCart = async (req, res, next) => {
     const existingItemIndex = cart.items.findIndex(
       (item) => item.productId.toString() === productId
     );
+    // -- calculating the total requested amount
+    const totalRequestedAmount =
+      existingItemIndex >= 0
+        ? cart.items[existingItemIndex].amount + amount
+        : amount;
+    // -- checking if requested amount exceeds available product amount
+    if (totalRequestedAmount > product.amount) {
+      return res.status(400).json({ message: `Not enough ${product.name}` });
+    }
     // -- if the product is int the cart -> add the amount to existing amount od product
     if (existingItemIndex >= 0) {
       cart.items[existingItemIndex].amount += amount;
@@ -72,6 +80,10 @@ const decreaseItemAmountInCart = async (req, res, next) => {
   try {
     // -- getting customerId from request
     const customerId = req.params.id;
+    // -- Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new HttpError("Invalid customer ID format", 400));
+    }
     // -- getting parameters from request
     const { productId } = req.body;
     // -- checking if all necessary parameters are present
@@ -191,6 +203,10 @@ const getCartItems = async (req, res, next) => {
   try {
     // -- getting customerId from request
     const customerId = req.params.id;
+    // -- Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new HttpError("Invalid customer ID format", 400));
+    }
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId }).populate("items.productId");
     // -- if the cart exists getting sending all the cart items to the client
@@ -276,6 +292,10 @@ const resetCart = async (req, res, next) => {
   try {
     // -- getting customerId from request
     const customerId = req.params.id;
+    // -- Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new HttpError("Invalid customer ID format", 400));
+    }
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId });
     // -- if the cart exists deleting all the items ftom it
@@ -301,6 +321,10 @@ const calculateTotalPrice = async (req, res, next) => {
   try {
     // -- getting customerId from request
     const customerId = req.params.id;
+    // -- Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new HttpError("Invalid customer ID format", 400));
+    }
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId });
     // -- if the cart exists calculating its total price
