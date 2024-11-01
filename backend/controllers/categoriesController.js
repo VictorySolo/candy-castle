@@ -27,11 +27,12 @@ const createCategory = async (req, res, next) => {
 }
 
 //GET - get a single category by name and related products
-const getCategoryByName = async (req, res, next) => {
+const getCategoryById = async (req, res, next) => {
     try {
-        const category = await Category.findOne({ name: req.params.name }).populate('products');
+        const id = req.params.id
+        const category = await Category.findById(id).populate('products');
         if (!category) {
-            return res.status(404).json({ message: 'Category not found' });
+            return next(new HttpError("Couldn't find the cutegory", 404));
         }
         res.status(200).json(category);
     } catch (err) {
@@ -42,12 +43,13 @@ const getCategoryByName = async (req, res, next) => {
 // Update a category by ID
 const updateCategory = async (req, res, next) => {
     try {
-        const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
+        const id = req.params.id
+        const category = await Category.findByIdAndUpdate(id, req.body, {
             new: true,
             runValidators: true,
         })
         if (!category) {
-            return res.status(404).json({ message: 'Category not found' })
+            return next(new HttpError("Category not found", 404))
         }
         res.status(200).json({ message: 'Category updated successfully', category })
     } catch (err) {
@@ -56,14 +58,15 @@ const updateCategory = async (req, res, next) => {
 }
 
 // DELETE - delete category by ID and remove the association from products
-const deleteCategory = async (req, res, next) => {
+const deleteCategoryById = async (req, res, next) => {
     try {
-        const category = await Category.findByIdAndDelete(req.params.id);
+        const id = req.params.id
+        const category = await Category.findByIdAndDelete(id);
         if (!category) {
-            return res.status(404).json({ message: 'Category not found' })
+            return next(new HttpError("Couldn't find the category", 404))
         }
         // Remove category reference from all related products
-        await Product.updateMany({ categoryId: category._id }, { $unset: { categoryId: '' } })
+        await Product.updateMany({ category: category._id }, { $unset: { categoryId: '' } })
         res.status(200).json({ message: 'Category and associations deleted successfully' })
     } catch (err) {
         next(err)
@@ -109,8 +112,8 @@ const addCategoryToProduct = async (req, res, next) => {
 module.exports = {
     gettingAll,
     createCategory,
-    getCategoryByName,
+    getCategoryById,
     updateCategory,
-    deleteCategory,
+    deleteCategoryById,
     addCategoryToProduct
 }
