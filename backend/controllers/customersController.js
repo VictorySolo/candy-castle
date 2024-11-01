@@ -1,5 +1,7 @@
-// -- import modules
+// -- import models
 const Customer = require("../models/customer");
+// -- importing mongoose
+const mongoose = require("mongoose");
 // -- extended Error class import
 const HttpError = require("../services/HttpError");
 // -- adding bcrypt for password hashing
@@ -84,6 +86,10 @@ const gettingById = async (req, res, next) => {
   try {
     // -- reading id from request
     const id = req.params.id;
+    // -- Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new HttpError("Invalid customer ID format", 400));
+    }
     // -- finding customer by id in the database
     const customer = await Customer.findById(id);
     if (!customer) {
@@ -105,6 +111,10 @@ const updating = async (req, res, next) => {
     let newPassword;
     // -- reading id from request
     const id = req.params.id;
+    // -- Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new HttpError("Invalid customer ID format", 400));
+    }
     // -- getting parameters from the request
     const {
       firstName,
@@ -160,6 +170,10 @@ const deleting = async (req, res, next) => {
   try {
     // -- reading id from request
     const id = req.params.id;
+    // -- Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new HttpError("Invalid customer ID format", 400));
+    }
     // -- deleting customer by id from the database
     const deletedCustomer = await Customer.findByIdAndDelete(id);
     if (!deletedCustomer) {
