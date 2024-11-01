@@ -7,7 +7,7 @@ const HttpError = require('../services/HttpError')
 //GET - get all products 
 const gettingAll = async (req, res, next) => {
     try {
-        const products = await Product.findAll()
+        const products = await Product.find()
         if (!products || products.length === 0) {
             return next(new HttpError("No products found", 404))
         }
@@ -26,7 +26,7 @@ const allProductsByCategory = async (req, res, next) => {
         const category = await Category.findOne({ name: categoryName })
 
         if (!category) {
-            return res.status(404).json({ message: 'Category not found' });
+            return next(new HttpError("Category not found", 404))
         }
         // Find products that belong to the found category
         const products = await Product.find({ category: category._id }).select('name description price')
@@ -40,9 +40,39 @@ const allProductsByCategory = async (req, res, next) => {
 // POST - Create a new product
 const createProduct = async (req, res, next) => {
     try {
-        const newProduct = new Product(req.body); // req.body contains product details
-        await newProduct.save();
-        res.status(201).json({ message: 'Product created successfully', product: newProduct });
+        const {
+            name,
+            description,
+            composition,
+            weight,
+            energy,
+            category,
+            availability,
+            amount,
+            price
+        } = req.body
+
+        if (!name || !description || !composition || !weight || !energy || !category || !availability || !amount || !price) {
+            return next(new HttpError("Not enough data for creating a product", 400))
+        }
+        //Create a new product in database
+        const product = await Product.create({
+            name,
+            description,
+            composition,
+            weight,
+            energy,
+            category,
+            availability,
+            amount,
+            price
+        })
+        if (!product) {
+            return next(
+                new HttpError("A problem occured while creating a product", 500)
+            )
+        }
+        res.status(201).json(product);
     } catch (err) {
         next(err)
     }
@@ -51,9 +81,12 @@ const createProduct = async (req, res, next) => {
 //GET - get product by ID
 const getProductById = async (req, res, next) => {
     try {
-        const product = await Product.findById(req.params.id).populate('category');
+        const id = req.params.id
+        const product = await Product.findById(id).populate('category');
 
-        if (!product) return res.status(404).json({ message: 'Product not found' });
+        if (!product) {
+            return next(new HttpError("Couldn't find the product", 404))
+        }
         res.status(200).json(product);
     } catch (err) {
         next(err)
@@ -63,13 +96,16 @@ const getProductById = async (req, res, next) => {
 // PUT - update product by ID
 const updateProduct = async (req, res, next) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
+        const id = req.params.id
+        const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
             new: true, // Return the updated product
             runValidators: true // Ensure the data is valid according to the schema
-        });
+        })
 
-        if (!updatedProduct) return res.status(404).json({ message: 'Product not found' });
-        res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
+        if (!updatedProduct) {
+            return next(new HttpError("Product was not found", 404))
+        }
+        res.status(200).json("Updated successfully")
     } catch (err) {
         next(err)
     }
@@ -78,37 +114,39 @@ const updateProduct = async (req, res, next) => {
 // DELETE - remove product by ID
 const deleteProductById = async (req, res, next) => {
     try {
-        const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+        const id = req.params.id
+        //Delete the productn by id from database
+        const deletedProduct = await Product.findByIdAndDelete(id);
 
-        if (!deletedProduct) return res.status(404).json({ message: 'Product not found' });
-        res.status(200).json({ message: 'Product deleted successfully' });
+        if (!deletedProduct) {
+            return next(new HttpError("Product ID not found", 404))
+        }
+        res.status(200).json('Product deleted successfully');
     } catch (err) {
         next(err)
     }
 };
 
-//GET - get all reviews by product ID or name
+//GET - get all reviews by product ID 
 const allReviews = async (req, res, next) => {
     try {
-        const { id, name } = req.params; // Get product ID or name from URL parameters
+        const id = req.params.id; // Get product ID or name from URL parameters
 
-        let product;
-
-        if (id) {
-            product = await Product.findById(id)
-        } else if (name) {
-            product = await Product.findOne({ name: new RegExp(name, 'i') })
-        }
+        const product = await Product.findById(id)
 
         if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
+            return next(new HttpError("No products found", 404))
         }
 
         // Find all reviews for the specified product
-        const reviews = await Review.find({ product: product._id }).populate('product'); // Populate product details if needed
+        const reviews = await Review.find({ product: product._id })
+            .populate({
+                path: 'customer',
+                select: '_id firstName lastName'
+            })
 
-        if (reviews.length === 0) {
-            return res.status(404).json({ message: 'No reviews found for this product' });
+        if (!reviews || reviews.length === 0) {
+            return next(new HttpError("No reviews found for this product", 404));
         }
 
         res.status(200).json(reviews);
