@@ -7,7 +7,12 @@ const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 // const bcrypt = require("bcrypt");
 // -- importing authentication functions
-const { createToken, checkToken } = require("./backend/services/authentication");
+const {
+  createToken,
+  checkToken,
+} = require("./backend/services/authentication");
+// -- importing functions from customersController
+const { creating } = require("./backend/controllers/customersController");
 // -- import modules from my files
 const inputTestData = require("./backend/services/inputTestData"); // import filling the DB function
 const { connectDB } = require("./backend/dist/db"); // Import the connectDB function
@@ -29,7 +34,7 @@ app.use(
 );
 app.use(helmet());
 app.post("/token", createToken);
-app.post("/customer", creating);
+app.post("/customers", creating);
 
 app.use(checkToken);
 
