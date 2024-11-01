@@ -1,18 +1,20 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 // const Product = require("./product.js");  // -- possible doen't required
 // const Customer = require("./customer.js");  // -- possible doen't required
 
 // -- orderSchema
-const reviewSchema = new mongoose.Schema(
+const reviewSchema = new Schema(
   {
     date: {
       type: Date,
       default: Date.now,
       required: true,
     },
-    products: {
-      type: mongoose.Schema.Types.ObjectId,
+    product: {
+      type: Schema.Types.ObjectId,
       ref: "Product", // connection with Product module of productSchema
+      required: true,
     },
 
     comment: {
@@ -27,8 +29,9 @@ const reviewSchema = new mongoose.Schema(
       max: [5, "Must be at most 5 or less, you entered {VALUE}"],
     },
     customer: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Customer", // connection with Customer module of customerSchema
+      required: true,
     },
   },
   {
