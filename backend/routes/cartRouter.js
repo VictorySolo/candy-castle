@@ -15,14 +15,14 @@ const {
 // -- setting up routers for cart
 router
   .route("/")
+  .get(getCartItems)
   .post(addItemToCart)
   .put(updateItemAmount)
   .delete(deleteItemFromCart);
 router
-  .route("/:id")
-  .get(getCartItems)
+  .route("/extra")
+  .get(calculateTotalPrice)
   .post(decreaseItemAmountInCart)
   .put(resetCart);
-router.get("/:id/price", calculateTotalPrice);
 // -- exporting routes
 module.exports = router;
