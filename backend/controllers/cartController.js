@@ -8,7 +8,9 @@ const mongoose = require("mongoose");
 const addItemToCart = async (req, res, next) => {
   try {
     // -- getting parameters from request
-    const { customerId, productId, amount } = req.body;
+    const { productId, amount } = req.body;
+    // -- getting customerId from session
+    const customerId = req.session.customerId;
     // -- checking if all necessary parameters exist
     if (!customerId || !productId || amount === undefined) {
       return res.status(400).json({ message: "Not enough parameters" });
@@ -78,13 +80,9 @@ const addItemToCart = async (req, res, next) => {
 // -- decreasing the amount of a product in the cart by 1
 const decreaseItemAmountInCart = async (req, res, next) => {
   try {
-    // -- getting customerId from request
-    const customerId = req.params.id;
-    // -- Validate the ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new HttpError("Invalid customer ID format", 400));
-    }
-    // -- getting parameters from request
+    // -- getting customerId from session
+    const customerId = req.session.customerId;
+    // -- getting productId from request
     const { productId } = req.body;
     // -- checking if all necessary parameters are present
     if (!productId) {
@@ -148,7 +146,9 @@ const decreaseItemAmountInCart = async (req, res, next) => {
 const updateItemAmount = async (req, res, next) => {
   try {
     // -- getting parameters from request
-    const { customerId, productId, amount } = req.body;
+    const { productId, amount } = req.body;
+    // -- getting customerId from session
+    const customerId = req.session.customerId;
     // -- checking if all necessary parameters exist
     if (!customerId || !productId || amount === undefined) {
       return res.status(400).json({ message: "Not enough parameters" });
@@ -201,12 +201,8 @@ const updateItemAmount = async (req, res, next) => {
 // -- getting all items in the cart
 const getCartItems = async (req, res, next) => {
   try {
-    // -- getting customerId from request
-    const customerId = req.params.id;
-    // -- Validate the ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new HttpError("Invalid customer ID format", 400));
-    }
+    // -- getting customerId from session
+    const customerId = req.session.customerId;
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId }).populate("items.productId");
     // -- if the cart exists getting sending all the cart items to the client
@@ -240,8 +236,10 @@ const getCartItems = async (req, res, next) => {
 // -- deleting an item from the cart
 const deleteItemFromCart = async (req, res, next) => {
   try {
-    // -- getting parameters from request
-    const { customerId, productId } = req.body;
+    // -- getting productId from request
+    const { productId } = req.body;
+    // -- getting customerId from session
+    const customerId = req.session.customerId;
     // -- checking if all necessary parameters exist
     if (!customerId || !productId) {
       return res.status(400).json({ message: "Not enough parameters" });
@@ -290,12 +288,8 @@ const deleteItemFromCart = async (req, res, next) => {
 // -- reseting the cart
 const resetCart = async (req, res, next) => {
   try {
-    // -- getting customerId from request
-    const customerId = req.params.id;
-    // -- Validate the ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new HttpError("Invalid customer ID format", 400));
-    }
+    // -- getting customerId from session
+    const customerId = req.session.customerId;
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId });
     // -- if the cart exists deleting all the items ftom it
@@ -319,12 +313,8 @@ const resetCart = async (req, res, next) => {
 // -- calculating the total price of items in the cart
 const calculateTotalPrice = async (req, res, next) => {
   try {
-    // -- getting customerId from request
-    const customerId = req.params.id;
-    // -- Validate the ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new HttpError("Invalid customer ID format", 400));
-    }
+    // -- getting customerId from session
+    const customerId = req.session.customerId;
     // -- getting existing cart object for current customer
     const cart = await Cart.findOne({ customerId });
     // -- if the cart exists calculating its total price
