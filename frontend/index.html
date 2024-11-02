@@ -16,7 +16,7 @@
             <!-- Logo -->
             <div id="logo">
                 <a href="/">
-                    <img src="../frontend/images/logo.png" alt="Candy Castle Logo">
+                    <img src="./images/logo.png" alt="Candy Castle Logo">
                 </a>
                 <h1 class="site-name">Candy Castle</h1>
             </div>
@@ -39,7 +39,7 @@
             <!-- Shopping Cart -->
             <div id="cart">
                 <a href="/cart">
-                    <img src="../frontend/images/candy-shop.png" alt="Shopping Cart Icon">
+                    <img src="./images/candy-shop.png" alt="Shopping Cart Icon">
                     <span id="cart-count">0</span>
                 </a>
             </div>
@@ -53,28 +53,8 @@
             <p>Explore our wide selection of sweets and candies!</p>
 
             <!-- Product Grid -->
-            <div class="product-grid">
-                <!-- Example Product Card -->
-                <div class="product-card">
-                    <img src="../frontend/images/chocolate_candy.png" alt="Chocolate Candy" class="product-img">
-                    <h3 class="product-name">Product Name</h3>
-                    <p class="product-description">A short description of the candy, highlighting its flavors and ingredients.</p>
-
-                    <!-- Rating -->
-                    <div class="product-rating">
-                        <span>&#9733;</span> <!-- Star icon -->
-                        <span>&#9733;</span>
-                        <span>&#9733;</span>
-                        <span>&#9733;</span>
-                        <span>&#9734;</span> <!-- Empty star icon -->
-                    </div>
-
-                    <!-- Price -->
-                    <p class="product-price">$4.99</p>
-
-                    <!-- Add to Cart Icon with Event Handler -->
-                    <img src="../frontend/images/plus.png" alt="Add to Cart" class="add-to-cart-icon">
-                </div>
+            <div id="product-grid" class="product-grid">
+                <!-- Products will be injected here by JavaScript -->
             </div>
         </section>
     </main>
@@ -97,6 +77,7 @@
         </div>
     </footer>
     <script src="app.js"></script>
+    <script src="products.js"></script> <!-- Adding new script for products -->
 </body>
 
 </html>
