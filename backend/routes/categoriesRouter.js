@@ -11,7 +11,7 @@ const{
 
 router.route("/").get(gettingAll).post(createCategory)
 router.route("/:id").get(getCategoryById).put(updateCategory).delete(deleteCategoryById)
-router.route("/:category/products/:name").get(addCategoryToProduct)
+router.route("/category").post(addCategoryToProduct)
 
 
 
