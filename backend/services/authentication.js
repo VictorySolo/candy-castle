@@ -9,7 +9,6 @@ require("dotenv").config();
 // -- import models
 const Customer = require("../models/customer");
 
-const { Op } = require("sequelize");
 
 // -- setting secret key from .env
 const secretKey = process.env.SECRET_KEY;
