@@ -9,8 +9,7 @@ const {
 } = require("../controllers/ordersController");
 
 // -- setting up routes for orders
-router.route("/").post(createNewOrder);
-router.route("/:id").delete(cancelOrder);
+router.route("/").post(createNewOrder).delete(cancelOrder);
 
 // -- exporting routes
 module.exports = router;

@@ -12,7 +12,43 @@ const Customer = require("../models/customer");
 // -- setting secret key from .env
 const secretKey = process.env.SECRET_KEY;
 
-// -- creating a token function
+// -- login function
+const login = async (req, res, next) => {
+  try {
+    // -- getting parameters from the request
+    const { email, password } = req.body;
+
+    // -- checking if all necessary parameters exist
+    if (!email || !password) {
+      return next(new HttpError("Not enough data for authentication", 400));
+    }
+
+    // -- checking if the customer is in the DB
+    const customer = await Customer.findOne({ email });
+
+    // -- if customer was not found in the DB
+    if (!customer) {
+      return next(new HttpError("Couldn't find customer", 404));
+    }
+
+    // -- checking if the password is correct
+    const isPasswordCorrect = await bcrypt.compare(password, customer.password);
+    if (!isPasswordCorrect) {
+      return next(new HttpError("Password is incorrect", 404));
+    }
+    // -- creating a session and storing user ID
+    req.session.customerId = customer._id;
+
+    // -- sending response to the client with success login message
+    res.status(200).json({ message: "Logged in successfully" });
+  } catch (err) {
+    console.log("Error during login (login)");
+    // -- handling the error
+    next(err);
+  }
+};
+
+// -- createToken function (old function)
 const createToken = async (req, res, next) => {
   try {
     // -- getting parameters from the request
@@ -45,8 +81,19 @@ const createToken = async (req, res, next) => {
     next(err);
   }
 };
+// -- isLoggedIn middleware
+const isLoggedIn = (req, res, next) => {
+  // -- checking if the customerId is present in the session
+  if (req.session.customerId) {
+    next();
+  } else {
+    // -- sending response to the client "No token"
+    next(new HttpError("Unauthorized: Please log in", 401));
+    // res.status(401).json({ message: "Unauthorized: Please log in" });
+  }
+};
 
-// -- checking if client has a token function
+// -- checking if client has a token function (old function)
 const checkToken = async (req, res, next) => {
   try {
     // -- getting the token from the client's cookies
@@ -72,4 +119,41 @@ const checkToken = async (req, res, next) => {
   }
 };
 
-module.exports = { createToken, checkToken };
+// -- isAdmin middleware
+const isAdmin = (req, res, next) => {
+  // -- checking if the customerId is present in the session
+  if (req.session.customerId) {
+    // -- search customer by Id
+    Customer.findById(req.session.customerId, (err, customer) => {
+      // -- if the !customer or error - the customert is not logged in
+      if (err || !customer) {
+        return res.status(401).json({ message: "Unauthorized: Please log in" });
+      }
+      // -- customer is not admin
+      if (!customer.isAdmin) {
+        return res.status(403).json({
+          message: "Forbidden: You do not have the required permissions",
+        });
+      }
+      // -- customer is admin
+      next();
+    });
+  } else {
+    // -- not in the session
+    res.status(401).json({ message: "Unauthorized: Please log in" });
+  }
+};
+
+// -- logoff function
+const logout = (req, res, next) => {
+  // -- destroying the session
+  req.session.destroy((err) => {
+    if (err) {
+      return next(new HttpError("Error logging out", 500));
+    }
+    // -- sending response to the client with success logoff message
+    res.status(200).json({ message: "Logged out successfully" });
+  });
+};
+// -- exporting functions
+module.exports = { login, isLoggedIn, logout, isAdmin };

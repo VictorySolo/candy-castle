@@ -25,7 +25,7 @@ const customerSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, "Email is required"],
-      unique: true,
+      unique: [true, "Email has to be is unique"],
       lowercase: true,
       trim: true,
       validate: {
@@ -77,6 +77,8 @@ const customerSchema = new mongoose.Schema(
         ref: "Order", // connection with Order module of orderSchema
       },
     ],
+    // -- admin flag
+    isAdmin: { type: Boolean, default: false, required: true },
   },
   {
     methods: {

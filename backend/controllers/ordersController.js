@@ -4,11 +4,13 @@ const Customer = require("../models/customer");
 const Cart = require("../models/cart");
 const Product = require("../models/product");
 
-// -- creating a new order for a customer
+// -- creating a new order for a customer (only for current customer)
 const createNewOrder = async (req, res, next) => {
   try {
-    // -- getting parameters from the request
-    const { customerId, deliveryAddress } = req.body;
+    // -- getting deliveryAddress from the request
+    const { deliveryAddress } = req.body;
+    // -- getting customerId from session
+    const customerId = req.session.customerId;
     // -- checking if all necessary parameters exist
     if (!customerId || !deliveryAddress) {
       return res.status(400).json({ message: "Not enough parameters" });
@@ -54,10 +56,6 @@ const createNewOrder = async (req, res, next) => {
     await Customer.findByIdAndUpdate(customerId, {
       $push: { orders: newOrder._id },
     });
-    // uncomment if the line above doesn't work
-    // const customer = await Customer.findById(customerId);
-    // customer.orders.push(newOrder._id);
-    // await customer.save();
 
     // -- clearing the customer's cart
     cart.items = [];
@@ -85,7 +83,7 @@ const createNewOrder = async (req, res, next) => {
 };
 
 // -- canceling an order by ID
-const cancelOrder = async (req, res) => {
+const cancelOrder = async (req, res, next) => {
   try {
     // -- getting orderId from request
     const orderId = req.params.id;
@@ -95,16 +93,32 @@ const cancelOrder = async (req, res) => {
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
+
+    // -- getting customerId from session
+    const loggedInCustomerId = req.session.customerId;
+    // -- searching logged in customer in the DB
+    const loggedInCustomer = await Customer.findById(loggedInCustomerId);
+    // -- logged in customer is not in the DB
+    if (!loggedInCustomer) {
+      return res.status(401).json({ message: "Unauthorized: Please log in" });
+    }
+
+    // -- checking if current customer has rights to cancel requested order
+    if (
+      !loggedInCustomer.isAdmin &&
+      order.customer.toString() !== loggedInCustomerId.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Forbidden: You can only cancel your own orders" });
+    }
+
     // -- getting customerId from the order
     const customerId = order.customer;
     // -- removing the order from the customer's order list
     await Customer.findByIdAndUpdate(customerId, {
       $pull: { orders: orderId },
     });
-    // uncomment if the line above doesn't work
-    // const customer = await Customer.findById(customerId);
-    // customer.orders = customer.orders.filter((id) => id.toString() !== orderId);
-    // await customer.save();
 
     // -- deleting the order from the DB
     await order.remove();

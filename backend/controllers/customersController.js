@@ -14,9 +14,21 @@ const saltRounds = parseInt(process.env.SALT_ROUNDS);
 const passwordREGX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-// -- geting all customers function
+// -- geting all customers function (only for admin)
 const gettingAll = async (req, res, next) => {
   try {
+    // -- getting customerId from session
+    const loggedInCustomerId = req.session.customerId;
+    // -- searching logged in customer in the DB
+    const loggedInCustomer = await Customer.findById(loggedInCustomerId);
+    // -- logged in customer is not in the DB or is not admin
+    if (!loggedInCustomer || !loggedInCustomer.isAdmin) {
+      return next(
+        new HttpError("Forbidden: Only admins can access this resource", 403)
+      );
+    }
+
+    // -- fetching all customers
     const customers = await Customer.find();
     if (!customers || customers.length === 0) {
       return next(new HttpError("No customers found", 404));
@@ -42,6 +54,7 @@ const creating = async (req, res, next) => {
       age,
       phone,
       deliveryAddress,
+      isAdmin,
     } = req.body;
     // -- checkong if all the required in customerSchema data exists
     if (!firstName || !lastName || !email || !password || !age || !phone) {
@@ -57,6 +70,23 @@ const creating = async (req, res, next) => {
     }
     // -- hashing the password using bcrypt
     const newPassword = await bcrypt.hash(password, saltRounds);
+
+    // -- setting isAdmin based on logged-in user's status
+    let adminFlag = false;
+    if (req.session.customerId) {
+      // -- getting customerId from session
+      const loggedInCustomerId = req.session.customerId;
+      // -- searching logged in customer in the DB
+      const loggedInCustomer = await Customer.findById(loggedInCustomerId);
+      // -- if current user is admin and isAdmin exists
+      if (
+        loggedInCustomer &&
+        loggedInCustomer.isAdmin &&
+        isAdmin !== undefined
+      ) {
+        adminFlag = isAdmin;
+      }
+    }
     // -- creating new customer in the database
     const customer = await Customer.create({
       firstName,
@@ -65,6 +95,7 @@ const creating = async (req, res, next) => {
       phone,
       email,
       deliveryAddress,
+      isAdmin: adminFlag,
       password: newPassword,
     });
     if (!customer) {
@@ -76,6 +107,16 @@ const creating = async (req, res, next) => {
     res.status(200).json(customer); // probably need to return only a OK messageS
   } catch (err) {
     console.log("Error creating a customer (creating)");
+    // -- checking for duplicate key error
+    if (err.code && err.code === 11000) {
+      // -- handling duplicate email error
+      return next(
+        new HttpError(
+          "This email is already registered. Please use a different email.",
+          409
+        )
+      );
+    }
     // -- handling the error
     next(err);
   }
@@ -89,6 +130,25 @@ const gettingById = async (req, res, next) => {
     // -- Validate the ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return next(new HttpError("Invalid customer ID format", 400));
+    }
+
+    // -- getting customerId from session
+    const loggedInCustomerId = req.session.customerId;
+    // -- searching logged in customer in the DB
+    const loggedInCustomer = await Customer.findById(loggedInCustomerId);
+    // -- logged in customer is not in the DB
+    if (!loggedInCustomer) {
+      return next(new HttpError("Logged-in customer not found", 401));
+    }
+
+    // -- checking if current customer has rights to request customer's data
+    if (!loggedInCustomer.isAdmin && loggedInCustomerId.toString() !== id) {
+      return next(
+        new HttpError(
+          "Forbidden: You can only access your own information",
+          403
+        )
+      );
     }
     // -- finding customer by id in the database
     const customer = await Customer.findById(id);
@@ -124,6 +184,7 @@ const updating = async (req, res, next) => {
       age,
       phone,
       deliveryAddress,
+      isAdmin,
     } = req.body;
     // -- if password must be updated
     if (password) {
@@ -136,6 +197,25 @@ const updating = async (req, res, next) => {
       // -- hashing the password using bcrypt
       newPassword = await bcrypt.hash(password, saltRounds);
     }
+
+    // -- getting customerId from session
+    const loggedInCustomerId = req.session.customerId;
+    // -- searching logged in customer in the DB
+    const loggedInCustomer = await Customer.findById(loggedInCustomerId);
+    // -- logged in customer is not in the DB
+    if (!loggedInCustomer) {
+      return next(new HttpError("Logged-in customer not found", 401));
+    }
+
+    // -- checking if current customer has rights to update requested customer data
+    if (!loggedInCustomer.isAdmin && loggedInCustomerId.toString() !== id) {
+      return next(
+        new HttpError(
+          "Forbidden: You can only update your own information",
+          403
+        )
+      );
+    }
     // -- updating customer's data in the database
     const updatedCustomer = await Customer.findByIdAndUpdate(
       id,
@@ -147,6 +227,10 @@ const updating = async (req, res, next) => {
         age,
         phone,
         deliveryAddress,
+        // Update isAdmin only if the user is an admin and isAdmin is provided in the request body
+        ...(loggedInCustomer.isAdmin && {
+          isAdmin: isAdmin !== undefined ? isAdmin : loggedInCustomer.isAdmin,
+        }),
       },
       { new: true }
     );
@@ -165,7 +249,7 @@ const updating = async (req, res, next) => {
   }
 };
 
-// -- deleting customer by id function
+// -- deleting customer by id function (only for admin)
 const deleting = async (req, res, next) => {
   try {
     // -- reading id from request
@@ -174,6 +258,18 @@ const deleting = async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return next(new HttpError("Invalid customer ID format", 400));
     }
+
+    // -- getting customerId from session
+    const loggedInCustomerId = req.session.customerId;
+    // -- searching logged in customer in the DB
+    const loggedInCustomer = await Customer.findById(loggedInCustomerId);
+    // -- logged in customer is not in the DB or is not admin
+    if (!loggedInCustomer || !loggedInCustomer.isAdmin) {
+      return next(
+        new HttpError("Forbidden: Only admins can delete customers", 403)
+      );
+    }
+
     // -- deleting customer by id from the database
     const deletedCustomer = await Customer.findByIdAndDelete(id);
     if (!deletedCustomer) {
@@ -193,8 +289,27 @@ const allOrders = async (req, res, next) => {
   try {
     // -- reading id from request
     const id = req.params.id;
-    // -- finding customer by id in the database and populate orders relation
 
+    // -- getting customerId from session
+    const loggedInCustomerId = req.session.customerId;
+    // -- searching logged in customer in the DB
+    const loggedInCustomer = await Customer.findById(loggedInCustomerId);
+    // -- logged in customer is not in the DB
+    if (!loggedInCustomer) {
+      return next(new HttpError("Logged-in customer not found", 401));
+    }
+
+    // Check if the user is admin or requesting their own data
+    if (!loggedInCustomer.isAdmin && loggedInCustomerId.toString() !== id) {
+      return next(
+        new HttpError(
+          "Forbidden: You can only access your own information",
+          403
+        )
+      );
+    }
+
+    // -- finding customer by id in the database and populate orders relation
     const customer = await Customer.findById(id)
       .populate({
         path: "orders",
