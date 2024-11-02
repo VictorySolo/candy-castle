@@ -72,6 +72,16 @@ const inputTestData = async () => {
       deliveryAddress: "Oceanview drv., 33, Geektown, 12-126, 0555312565",
       password: "!qweQWE1",
     },
+    {
+      firstName: "admin",
+      lastName: "admin",
+      age: 21,
+      phone: "0557777777",
+      email: "admin@ma.il",
+      deliveryAddress: "admin st., 1, AdminCity, 00-001, 0557777777",
+      password: "!adminADMIN1",
+      isAdmin: true,
+    },
   ];
 
   try {
@@ -364,7 +374,9 @@ const inputTestData = async () => {
   // -- creating test orders
   try {
     // -- getting all customers and products from the DB
-    const customers = await Customer.find();
+    const customers_all = await Customer.find();
+    // -- excluding admin (which is the last customer)
+    const customers = customers_all.slice(0, -1);
     const products = await Product.find();
 
     // -- selecting 4 customers of all the test customers randomly
