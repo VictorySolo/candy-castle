@@ -12,34 +12,34 @@
 
     <!-- Header -->
     <header>
-        <div id="header">
+        <div class="header-container">
             <!-- Logo -->
             <div id="logo">
                 <a href="/">
-                    <img src="../frontend/images/logo.png" alt="logo">
+                    <img src="../frontend/images/logo.png" alt="Candy Castle Logo">
                 </a>
-                <h1 id="name">Candy Castle</h1>
+                <h1 class="site-name">Candy Castle</h1>
             </div>
 
             <!-- Navigation menu -->
             <nav id="navigation">
                 <ul>
-                    <li><a href="#main">Main</a></li>
-                    <li><a href="#categories">Categories</a></li>
-                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/categories">Categories</a></li>
+                    <li><a href="/contact">Contact</a></li>
                 </ul>
             </nav>
 
-            <!-- Contact Information -->
-            <div id="contacts">
-                <p>Email: info@candycastle.com</p>
-                <p>Phone: +972 (055) 123-4567</p>
+            <!-- Authorization -->
+            <div class="auth-buttons">
+                <button id="register">Register</button>
+                <button id="login">Login</button>
             </div>
 
             <!-- Shopping Cart -->
             <div id="cart">
-                <a href="#cart">
-                    <img src="../frontend/images/candy-shop.png" alt="Shopping Cart">
+                <a href="/cart">
+                    <img src="../frontend/images/candy-shop.png" alt="Shopping Cart Icon">
                     <span id="cart-count">0</span>
                 </a>
             </div>
@@ -53,30 +53,27 @@
             <p>Explore our wide selection of sweets and candies!</p>
 
             <!-- Product Grid -->
-            <div id="product-grid">
-
+            <div class="product-grid">
                 <!-- Example Product Card -->
-                <div id="product-card">
-                    <img src="../frontend/images/chocolate_candy.png" alt="Chocolate candy" id="product-img">
-                    <h3 id="product-name">Product Name</h3>
-                    <p id="product-description">A short description of the candy, highlighting its flavors and
-                        ingredients.</p>
+                <div class="product-card">
+                    <img src="../frontend/images/chocolate_candy.png" alt="Chocolate Candy" class="product-img">
+                    <h3 class="product-name">Product Name</h3>
+                    <p class="product-description">A short description of the candy, highlighting its flavors and ingredients.</p>
 
-                        <!-- Rating -->
-                        <div id="product-rating">
-                            <span>&#9733;</span> <!-- Star icon -->
-                            <span>&#9733;</span>
-                            <span>&#9733;</span>
-                            <span>&#9733;</span>
-                            <span>&#9734;</span> <!-- Empty star icon -->
-                        </div>
+                    <!-- Rating -->
+                    <div class="product-rating">
+                        <span>&#9733;</span> <!-- Star icon -->
+                        <span>&#9733;</span>
+                        <span>&#9733;</span>
+                        <span>&#9733;</span>
+                        <span>&#9734;</span> <!-- Empty star icon -->
+                    </div>
 
-                        <!-- Price -->
-                        <p id="product-price">$4.99</p>
+                    <!-- Price -->
+                    <p class="product-price">$4.99</p>
 
-                        <!-- Add to Cart Icon with Event Handler -->
-                        <img src="../frontend/images/plus.png" alt="Add to Cart" id="add-to-cart-icon">
-
+                    <!-- Add to Cart Icon with Event Handler -->
+                    <img src="../frontend/images/plus.png" alt="Add to Cart" class="add-to-cart-icon">
                 </div>
             </div>
         </section>
@@ -84,22 +81,22 @@
 
     <!-- Footer -->
     <footer>
-        <div id="footer">
-
+        <div class="footer-container">
             <!-- Contact Information -->
-            <div id="footer-contact">
+            <div class="footer-contact">
                 <h3>Contact Us</h3>
                 <p>Email: support@candycastle.com</p>
                 <p>Phone: +972 (055) 123-4567</p>
                 <p>Address: 123 Sweet St, Candy City, Israel</p>
             </div>
-        </div>
 
-        <!-- Copyright -->
-        <div id="footer-copyright">
-            <p>&copy; 2024 Candy Castle. All rights reserved.</p>
+            <!-- Copyright -->
+            <div class="footer-copyright">
+                <p>&copy; 2024 Candy Castle. All rights reserved.</p>
+            </div>
         </div>
     </footer>
     <script src="app.js"></script>
 </body>
+
 </html>
