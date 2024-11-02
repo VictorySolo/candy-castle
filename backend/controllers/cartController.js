@@ -22,11 +22,17 @@ const addItemToCart = async (req, res, next) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // -- getting existing cart object for current customer
-    let cart = await Cart.findOne({ customerId });
-    // -- creating a new Cart object if the cart for the current customer is empty
-    if (!cart) {
-      cart = new Cart({ customerId, items: [] });
+    let cart;
+    // -- if customer logged in
+    if (customerId) {
+      // -- getting existing cart object for current customer
+      cart = await Cart.findOne({ customerId });
+      if (!cart) {
+        cart = new Cart({ customerId, items: [] });
+      }
+    } else {
+      // Use session for guest cart
+      cart = req.session.cart || { items: [] };
     }
     // -- checking if the current product is already in the cart
     const existingItemIndex = cart.items.findIndex(
@@ -88,8 +94,16 @@ const decreaseItemAmountInCart = async (req, res, next) => {
     if (!productId) {
       return res.status(400).json({ message: "Not enough parameters" });
     }
-    // -- getting existing cart object for current customer
-    const cart = await Cart.findOne({ customerId });
+    let cart;
+    // -- if customer logged in
+    if (customerId) {
+      // -- getting existing cart object for current customer
+      cart = await Cart.findOne({ customerId });
+    } else {
+      // -- using session for guest cart
+      cart = req.session.cart || { items: [] };
+    }
+
     // -- if the cart exists getting the current product from the cart
     if (cart) {
       const existingItemIndex = cart.items.findIndex(
@@ -165,15 +179,40 @@ const updateItemAmount = async (req, res, next) => {
         .status(400)
         .json({ message: `Amount must be between 1 and ${product.amount}` });
     }
+
     // -- updating the amount of the product and getting the updated cart object
-    const cart = await Cart.findOneAndUpdate(
-      { customerId, "items.productId": productId },
-      { $set: { "items.$.amount": amount } },
-      { new: true }
-    ).populate("items.productId");
+    // const cart = await Cart.findOneAndUpdate(
+    //   { customerId, "items.productId": productId },
+    //   { $set: { "items.$.amount": amount } },
+    //   { new: true }
+    // ).populate("items.productId");
+
+    let cart;
+    // -- if customer logged in
+    if (customerId) {
+      // -- updating the amount of the product and getting the updated cart object
+      cart = await Cart.findOneAndUpdate(
+        { customerId, "items.productId": productId },
+        { $set: { "items.$.amount": amount } },
+        { new: true }
+      ).populate("items.productId");
+    } else {
+      // -- using session for guest cart
+      cart = req.session.cart || { items: [] };
+      const existingItemIndex = cart.items.findIndex(
+        (item) => item.productId.toString() === productId
+      );
+      cart.items[existingItemIndex].amount = amount;
+      req.session.cart = cart;
+    }
 
     // -- calculating the total price
-    const totalPrice = await cart.calculateTotalPrice();
+    const totalPrice = customerId
+      ? await cart.calculateTotalPrice()
+      : cart.items.reduce(
+          (total, item) => total + item.amount * item.productId.price,
+          0
+        );
 
     // -- formatting the response
     const responseCart = {
@@ -203,8 +242,16 @@ const getCartItems = async (req, res, next) => {
   try {
     // -- getting customerId from session
     const customerId = req.session.customerId;
-    // -- getting existing cart object for current customer
-    const cart = await Cart.findOne({ customerId }).populate("items.productId");
+    let cart;
+    // -- if customer logged in
+    if (customerId) {
+      // -- getting existing cart object for current customer
+      cart = await Cart.findOne({ customerId }).populate("items.productId");
+    } else {
+      // -- using session for guest cart
+      cart = req.session.cart || { items: [] };
+    }
+
     // -- if the cart exists getting sending all the cart items to the client
     if (cart) {
       const filteredItems = cart.items.map((item) => ({
@@ -214,7 +261,13 @@ const getCartItems = async (req, res, next) => {
         amount: item.amount,
       }));
       // -- calculating the total price const
-      totalPrice = await cart.calculateTotalPrice();
+      const totalPrice = customerId
+        ? await cart.calculateTotalPrice()
+        : cart.items.reduce(
+            (total, item) => total + item.amount * item.productId.price,
+            0
+          );
+
       // -- formatting the response
       const responseCart = {
         customerId: cart.customerId,
@@ -250,15 +303,40 @@ const deleteItemFromCart = async (req, res, next) => {
       return res.status(404).json({ message: "Product not found" });
     }
     // -- updating the cart and filtering out the product
-    const cart = await Cart.findOneAndUpdate(
-      { customerId },
-      { $pull: { items: { productId } } },
-      { new: true }
-    ).populate("items.productId");
+    // const cart = await Cart.findOneAndUpdate(
+    //   { customerId },
+    //   { $pull: { items: { productId } } },
+    //   { new: true }
+    // ).populate("items.productId");
+
+    let cart;
+    // -- if customer logged in
+    if (customerId) {
+      // -- updating the cart and filtering out the product
+      cart = await Cart.findOneAndUpdate(
+        { customerId },
+        { $pull: { items: { productId } } },
+        { new: true }
+      ).populate("items.productId");
+    } else {
+      // -- using session for guest cart
+      cart = req.session.cart || { items: [] };
+      cart.items = cart.items.filter(
+        (item) => item.productId.toString() !== productId
+      );
+      req.session.cart = cart;
+    }
+
     // -- if the cart exists filter all the items without the current product
     if (cart) {
       // -- calculating the total price
-      const totalPrice = await cart.calculateTotalPrice();
+      const totalPrice = customerId
+        ? await cart.calculateTotalPrice()
+        : cart.items.reduce(
+            (total, item) => total + item.amount * item.productId.price,
+            0
+          );
+
       // -- formatting the response
       const responseCart = {
         customerId: cart.customerId,
@@ -290,8 +368,17 @@ const resetCart = async (req, res, next) => {
   try {
     // -- getting customerId from session
     const customerId = req.session.customerId;
-    // -- getting existing cart object for current customer
-    const cart = await Cart.findOne({ customerId });
+
+    let cart;
+    // -- if customer logged in
+    if (customerId) {
+      // -- getting existing cart object for current customer
+      cart = await Cart.findOne({ customerId });
+    } else {
+      // -- using session for guest cart
+      cart = req.session.cart || { items: [] };
+    }
+
     // -- if the cart exists deleting all the items ftom it
     if (cart) {
       cart.items = [];
