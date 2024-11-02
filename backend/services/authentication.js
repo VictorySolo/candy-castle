@@ -35,7 +35,7 @@ const createToken = async (req, res, next) => {
       return next(new HttpError("Password is incorrect", 404));
     }
     // -- creating a cookie "token" with customerId value
-    const token = jwt.sign(customer._id, secretKey);
+    const token = jwt.sign({ _id: customer._id}, secretKey);
     res.cookie("Ticket", token);
     // -- sending response to the client with success login message
     res.status(200).json({ message: "Logged in successfully" });
