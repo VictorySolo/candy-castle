@@ -68,9 +68,7 @@ const createProduct = async (req, res, next) => {
             price
         })
         if (!product) {
-            return next(
-                new HttpError("A problem occured while creating a product", 500)
-            )
+            return next(new HttpError("A problem occured while creating a product", 500))
         }
         res.status(201).json(product);
     } catch (err) {
