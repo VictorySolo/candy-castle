@@ -6,11 +6,22 @@ const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 // const bcrypt = require("bcrypt");
-
+// -- importing authentication functions
+const {
+  createToken,
+  checkToken,
+} = require("./backend/services/authentication");
+// -- importing functions from customersController
+const { creating } = require("./backend/controllers/customersController");
 // -- import modules from my files
 const inputTestData = require("./backend/services/inputTestData"); // import filling the DB function
 const { connectDB } = require("./backend/dist/db"); // Import the connectDB function
-
+// - import routers
+const categoriesRouter = require("./backend/routes/categoriesRouter");
+const customersRouter = require("./backend/routes/customersRouter");
+const productsRouter = require("./backend/routes/productsRouter");
+const ordersRouter = require("./backend/routes/ordersRouter");
+const cartRouter = require("./backend/routes/cartRouter");
 // -- middleware
 const app = express();
 app.use(express.json());
@@ -22,13 +33,11 @@ app.use(
   })
 );
 app.use(helmet());
+app.post("/token", createToken);
+app.post("/customers", creating);
 
-// - for routers
-const categoriesRouter = require("./backend/routes/categoriesRouter");
-const customersRouter = require("./backend/routes/customersRouter");
-const productsRouter = require("./backend/routes/productsRouter");
-const ordersRouter = require("./backend/routes/ordersRouter");
-const cartRouter = require("./backend/routes/cartRouter");
+app.use(checkToken);
+
 // -- global error handler
 const { errorLogger } = require("./backend/services/errorHandler");
 
