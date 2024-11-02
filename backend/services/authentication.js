@@ -9,7 +9,6 @@ require("dotenv").config();
 // -- import models
 const Customer = require("../models/customer");
 
-
 // -- setting secret key from .env
 const secretKey = process.env.SECRET_KEY;
 
@@ -31,11 +30,12 @@ const createToken = async (req, res, next) => {
       return next(new HttpError("Couldn't find customer", 404));
     }
     // -- checking if the password is correct
-    if (!bcrypt.compare(password, customer.password)) {
+    const isPasswordCorrect = await bcrypt.compare(password, customer.password);
+    if (!isPasswordCorrect) {
       return next(new HttpError("Password is incorrect", 404));
     }
     // -- creating a cookie "token" with customerId value
-    const token = jwt.sign({ _id: customer._id}, secretKey);
+    const token = jwt.sign({ _id: customer._id }, secretKey);
     res.cookie("Ticket", token);
     // -- sending response to the client with success login message
     res.status(200).json({ message: "Logged in successfully" });
