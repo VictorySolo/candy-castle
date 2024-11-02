@@ -23,10 +23,12 @@ const customersRouter = require("./backend/routes/customersRouter");
 const productsRouter = require("./backend/routes/productsRouter");
 const ordersRouter = require("./backend/routes/ordersRouter");
 const cartRouter = require("./backend/routes/cartRouter");
+const reviewsRouter = require("./backend/routes/reviewsRouter");
 // -- middleware
 const app = express();
 // -- using the built-in body parser middleware
 app.use(express.json());
+app.use(express.static("./frontend"));
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
@@ -49,22 +51,22 @@ app.post("/login", login);
 app.post("/customers", creating);
 // -- log off
 app.get("/logout", logout);
-
+// -- product list for unlogined user
+app.use("/products", productsRouter);
+app.use("/cart", cartRouter);
+app.use("/reviews", reviewsRouter);
 // -- routes
 app.use("/categories", isLoggedIn, categoriesRouter);
 app.use("/customers", isLoggedIn, customersRouter);
-app.use("/products", isLoggedIn, productsRouter);
+
 app.use("/orders", isLoggedIn, ordersRouter);
-app.use("/cart", isLoggedIn, cartRouter);
 
 // -- handling 404 errors
 app.use((req, res, next) => {
-  res
-    .status(404)
-    .json({
-      message:
-        "The resource you are looking for does not exist. Please check the URL and try again.",
-    });
+  res.status(404).json({
+    message:
+      "The resource you are looking for does not exist. Please check the URL and try again.",
+  });
 });
 // -- global error handler
 const { errorLogger } = require("./backend/services/errorHandler");
@@ -74,7 +76,7 @@ const startServer = async () => {
   // -- Calling connectDB and checking if the DB is connected
   if (await connectDB()) {
     // -- Call the function to input test data
-    // await inputTestData();
+    //  await inputTestData();
 
     // -- setting up PORT
     const PORT = process.env.PORT || 3000;
