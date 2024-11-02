@@ -5,7 +5,7 @@ const HttpError = require('../services/HttpError')
 //GET - get all gategories with related products
 const gettingAll = async (req, res, next) => {
     try {
-        const categories = await Category.find().populate('products')
+        const categories = await Category.find()
         if (!categories || categories.length === 0) {
             return next(new HttpError("No products found", 404))
         }
@@ -18,9 +18,22 @@ const gettingAll = async (req, res, next) => {
 // POST - Create a new category
 const createCategory = async (req, res, next) => {
     try {
-        const newCategory = new Category(req.body)
-        await newCategory.save()
-        res.status(201).json({ message: 'Category created successfully', category: newCategory })
+        const {
+            name,
+            description
+        } = req.body
+
+        if(!name|| !description){
+            return next(new HttpError("Not enough data for creating category", 400))
+        }
+        const category = await Category.create({
+            name,
+            description 
+        })
+        if(!category){
+            return next(new HttpError("A problem occured while creating a product", 500))
+        }
+        res.status(201).json(category)
     } catch (err) {
         next(err)
     }
@@ -78,16 +91,21 @@ const addCategoryToProduct = async (req, res, next) => {
     try {
         const { categoryId, productId } = req.body
 
+        // Check if both IDs are provided
+        if (!categoryId || !productId) {
+            return next(new HttpError("Both categoryId and productId are required", 400));
+        }
+
         // Find the category by ID
         const category = await Category.findById(categoryId)
         if (!category) {
             return res.status(404).json({ message: 'Category not found' })
         }
 
-        // Link product with category and update the category's products array
+        // Find the product by ID and update the category field
         const product = await Product.findByIdAndUpdate(
             productId,
-            { category: categoryId },
+            { category: categoryId }, //Link product to category
             {
                 new: true,
                 runValidators: true
@@ -97,13 +115,17 @@ const addCategoryToProduct = async (req, res, next) => {
             return next(new HttpError("Product not found", 404));
         }
 
-        // Ensure the product ID is unique in category's products list
+        // If productId is not in the category's products array, add it
         if (!category.products.includes(productId)) {
             category.products.push(productId);
-            await category.save();
+            await category.save(); // Save updated category with new product reference
         }
 
-        res.status(200).json({ message: 'Product linked to category successfully', product })
+        res.status(200).json({
+             message: 'Product linked to category successfully',
+             product,
+            category
+         })
     } catch (err) {
         next(err)
     }
