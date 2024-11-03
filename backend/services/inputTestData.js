@@ -468,21 +468,22 @@ const inputTestData = async () => {
       // -- declaring product variable to change it if the customer already wrote a review
       let product;
       // -- selecting a random product to review while selected customer already has a review for selected product
+      let existingReview;
+
       do {
         product = products[Math.floor(Math.random() * products.length)];
-      } while (
-        reviews.some(
+        existingReview = reviews.find(
           (review) =>
             review.customer.equals(customer._id) &&
-            review.products.equals(product._id)
-        )
-      );
+            review.product.equals(product._id)
+        );
+      } while (existingReview);
       // -- getting a comment-rating pair from commentsAndRatings array
       const { comment, rating } = commentsAndRatings[i];
       // -- creating review model according to reviewSchema
       const review = new Review({
         date: await getRandomDateInLast3Months(),
-        products: product._id, // setting a refference to product
+        product: product._id, // setting a refference to product
         comment,
         rating,
         customer: customer._id, // setting a refference to customer
