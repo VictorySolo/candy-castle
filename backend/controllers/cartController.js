@@ -4,7 +4,68 @@ const Cart = require("../models/cart");
 // -- import mongoose
 const mongoose = require("mongoose");
 
-// Add an item to the cart
+// -- transfering the cart from the local storage to the DB
+const transferCartToDB = async (req, res, next) => {
+  try {
+    // -- getting parameters from request
+    const { cart, customerId } = req.body;
+    // -- checking if all necessary parameters exist
+    if (!cart || !customerId) {
+      return res.status(400).json({ message: "Not enough parameters" });
+    }
+
+    // -- getting existing cart object for current customer
+    let existingCart = await Cart.findOne({ customerId });
+    if (!existingCart) {
+      existingCart = new Cart({ customerId, items: [] });
+    }
+
+    // -- processing each item in the cart
+    for (const item of cart) {
+      // -- checking if the item already exists in the cart
+      const existingItemIndex = existingCart.items.findIndex(
+        (cartItem) => cartItem.productId.toString() === item.productId
+      );
+
+      // -- if the item exists, update the amount
+      if (existingItemIndex >= 0) {
+        existingCart.items[existingItemIndex].amount += item.amount;
+
+        // -- Get the product from the database to check availability
+        const product = await Product.findById(item.productId);
+        if (!product) {
+          return res
+            .status(404)
+            .json({ message: `Product not found: ${item.productId}` });
+        }
+
+        // -- Ensure cart amount does not exceed product amount
+        if (existingCart.items[existingItemIndex].amount > product.amount) {
+          existingCart.items[existingItemIndex].amount = product.amount;
+        }
+      } else {
+        // -- if the item doesn't exist, add it to the cart
+        existingCart.items.push({
+          productId: item.productId,
+          amount: item.amount,
+        });
+      }
+    }
+
+    // -- saving the cart to the DB
+    await existingCart.save();
+    return res
+      .status(200)
+      .json({ status: "success", message: "Cart transferred successfully" });
+  } catch (error) {
+    console.error("Error transferring cart:", error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Failed to transfer cart" });
+  }
+};
+
+// -- adding an item to the cart
 const addItemToCart = async (req, res, next) => {
   try {
     // -- getting parameters from request
@@ -430,4 +491,5 @@ module.exports = {
   resetCart,
   updateItemAmount,
   calculateTotalPrice,
+  transferCartToDB,
 };
