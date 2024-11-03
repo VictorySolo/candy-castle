@@ -40,7 +40,7 @@ app.use(
 app.use(helmet());
 app.use(
   session({
-    secret: "your_secret_key", // Change this to a secure secret
+    secret: process.env.SESSION_SECRET, // Change this to a secure secret
     resave: false,
     saveUninitialized: false, // Ensure session is not saved until modified
     cookie: {
