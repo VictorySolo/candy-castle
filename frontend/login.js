@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (data.message === "Logged in successfully") {
           await transferCartToDB(cart, data.customerId);
+          localStorage.removeItem("cart"); // Clear cart after transfer
           window.location.href = "cart.html"; // Redirect to cart page
         } else {
           displayError(
@@ -58,7 +59,6 @@ async function transferCartToDB(cart, customerId) {
 
     if (response.ok) {
       console.log("Cart transferred to database successfully");
-      localStorage.removeItem("cart");
     } else {
       console.error("Failed to transfer cart to database");
     }

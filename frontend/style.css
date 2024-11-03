@@ -12,6 +12,8 @@ img {
     display: block;
 }
 
+/* General Body Styling */
+
 /* General body settings */
 body {
     font-family: 'Trebuchet MS', sans-serif;
@@ -115,7 +117,7 @@ header {
 /* Main Content */
 main {
     padding: 2rem 1rem;
-    background-color: transparent;
+    background-color: white;
     text-align: center;
     max-width: 1200px;
     margin: 0 auto;
