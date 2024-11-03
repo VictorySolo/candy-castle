@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <!-- Logo -->
+            <div id="logo">
+                <a href="/">
+                    <img src="./images/logo.png" alt="Candy Castle Logo">
+                </a>
+                <h1 class="site-name">Candy Castle</h1>
+            </div>
+
+            <!-- Navigation menu -->
+            <nav id="navigation">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/categories">Categories</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </nav>
+
+            <!-- Shopping Cart -->
+            <div id="cart">
+                <a href="/cart.html">
+                    <img src="./images/candy-shop.png" alt="Shopping Cart Icon">
+                    <span id="cart-count">0</span>
+                </a>
+            </div>
+
+            <!-- Authentication Buttons -->
+            <div id="auth-buttons"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <section id="login-section">
+            <h2>Login</h2>
+            <form id="login-form">
+                <div>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div>
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+            <div>
+                <button id="signup-btn">Not a customer yet? Press to sign up</button>
+            </div>
+            <div id="error-message"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-contact">
+                <h3>Contact Us</h3>
+                <p>Email: support@candycastle.com</p>
+                <p>Phone: +972 (055) 123-4567</p>
+                <p>Address: 123 Sweet St, Candy City, Israel</p>
+            </div>
+
+            <div class="footer-copyright">
+                <p>&copy; 2024 Candy Castle. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="login.js"></script>
+    <script src="authentication.js"></script>
+</body>
+
+</html>
