@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
     fetchProducts();
+    updateCartCount();
+    displayCartItems();  // -- Call displayCartItems when the page loads
 });
 
 async function fetchProducts() {
@@ -58,4 +60,51 @@ function calculateAverageRating(reviews) {
     if (!Array.isArray(reviews) || reviews.length === 0) return 0;
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
     return totalRating / reviews.length;
+}
+
+// -- Add product to cart
+function addToCart(productId) {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existingItemIndex = cart.findIndex(item => item.productId === productId);
+
+    if (existingItemIndex >= 0) {
+        cart[existingItemIndex].amount += 1;
+    } else {
+        cart.push({ productId, amount: 1 });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    displayCartItems();  // -- Update the cart view after adding an item
+}
+
+// -- Update cart count in the UI
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cartCount = cart.reduce((total, item) => total + item.amount, 0);
+    document.getElementById('cart-count').textContent = cartCount;
+}
+
+// -- Display cart items in the UI
+function displayCartItems() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cartItemsContainer = document.getElementById('cart-items');
+    
+    if (!cartItemsContainer) {
+        return; // If the cart page is not loaded
+    }
+
+    cartItemsContainer.innerHTML = ''; // Clear any existing content
+
+    cart.forEach(item => {
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+
+        cartItem.innerHTML = `
+            <p>Product ID: ${item.productId}</p>
+            <p>Amount: ${item.amount}</p>
+        `;
+
+        cartItemsContainer.appendChild(cartItem);
+    });
 }
