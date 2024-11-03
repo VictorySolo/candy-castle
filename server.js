@@ -10,6 +10,7 @@ const helmet = require("helmet");
 const {
   login,
   isLoggedIn,
+  isLoggedInMiddleware,
   logout,
 } = require("./backend/services/authentication");
 // -- importing functions from customersController
@@ -39,10 +40,14 @@ app.use(
 app.use(helmet());
 app.use(
   session({
-    secret: "your secret",
+    secret: "your_secret_key", // Change this to a secure secret
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }, // Set to true if using HTTPS
+    saveUninitialized: false, // Ensure session is not saved until modified
+    cookie: {
+      httpOnly: true,
+      secure: false, // Set to true if you're using HTTPS
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    },
   })
 );
 // -- login
@@ -51,15 +56,17 @@ app.post("/login", login);
 app.post("/customers", creating);
 // -- log off
 app.get("/logout", logout);
+// -- check if logged in
+app.get("/isLoggedIn", isLoggedIn);
 // -- product list for unlogined user
 app.use("/products", productsRouter);
 app.use("/cart", cartRouter);
 app.use("/reviews", reviewsRouter);
 // -- routes
-app.use("/categories", isLoggedIn, categoriesRouter);
-app.use("/customers", isLoggedIn, customersRouter);
+app.use("/categories", isLoggedInMiddleware, categoriesRouter);
+app.use("/customers", isLoggedInMiddleware, customersRouter);
 
-app.use("/orders", isLoggedIn, ordersRouter);
+app.use("/orders", isLoggedInMiddleware, ordersRouter);
 
 // -- handling 404 errors
 app.use((req, res, next) => {
@@ -76,7 +83,7 @@ const startServer = async () => {
   // -- Calling connectDB and checking if the DB is connected
   if (await connectDB()) {
     // -- Call the function to input test data
-    //  await inputTestData();
+    // await inputTestData();
 
     // -- setting up PORT
     const PORT = process.env.PORT || 3000;
