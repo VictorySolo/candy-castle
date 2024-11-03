@@ -29,16 +29,12 @@
                     <li><a href="/contact">Contact</a></li>
                 </ul>
             </nav>
-
-            <!-- Authorization -->
-            <div class="auth-buttons">
-                <button id="register">Register</button>
-                <button id="login">Login</button>
-            </div>
+            <!-- Auth Buttons -->
+            <div id="auth-buttons"></div>
 
             <!-- Shopping Cart -->
             <div id="cart">
-                <a href="/cart">
+                <a href="cart.html">
                     <img src="./images/candy-shop.png" alt="Shopping Cart Icon">
                     <span id="cart-count">0</span>
                 </a>
@@ -57,7 +53,7 @@
                 <!-- Products will be injected here by JavaScript -->
             </div>
         </section>
-    </main>
+
 
     <!-- Footer -->
     <footer>
@@ -78,6 +74,7 @@
     </footer>
     <script src="app.js"></script>
     <script src="products.js"></script> <!-- Adding new script for products -->
+    <script src="authentication.js"></script> <!-- login, log out, register buttons -->
 </body>
 
 </html>
