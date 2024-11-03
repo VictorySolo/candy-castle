@@ -10,6 +10,7 @@ const {
   resetCart,
   updateItemAmount,
   calculateTotalPrice,
+  transferCartToDB,
 } = require("../controllers/cartController");
 
 // -- setting up routers for cart
@@ -24,5 +25,6 @@ router
   .get(calculateTotalPrice)
   .post(decreaseItemAmountInCart)
   .put(resetCart);
+router.route("/transfer").post(transferCartToDB);
 // -- exporting routes
 module.exports = router;
