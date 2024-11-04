@@ -40,6 +40,10 @@ const login = async (req, res, next) => {
     // -- creating a session and storing user ID
     req.session.customerId = customer._id;
 
+    // -- creating a cookie "token" with customerId value
+    const token = jwt.sign({ _id: customer._id }, secretKey);
+    res.cookie("Ticket", token);
+
     // -- transfering the cart from the local storage to the DB
     if (cart && cart.length > 0) {
       let existingCart = await Cart.findOne({ customerId: customer._id });
@@ -120,19 +124,20 @@ const isLoggedIn = (req, res, next) => {
   // }
 };
 
-// -- checking if client has a token function (old function)
-const checkToken = async (req, res, next) => {
+// -- decoding token function (updated function)
+const decodeToken = async (req, res, next) => {
   try {
     // -- getting the token from the client's cookies
     const token = req.cookies.Ticket;
     // -- checking if the token exists
     if (token) {
-      // -- checking if the token is valid
-      jwt.verify(token, secretKey, (err, res) => {
+      // -- verifying and decoding the token
+      jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
-          // -- handling the error
           next(err);
         } else {
+          // -- attaching customerId to the request object
+          req.customerId = decoded._id;
           next();
         }
       });
@@ -178,6 +183,8 @@ const logout = (req, res, next) => {
     if (err) {
       return next(new HttpError("Error logging out", 500));
     }
+    // -- clear the cookie "Ticket"
+    res.clearCookie("Ticket");
     // -- sending response to the client with success logoff message
     res.status(200).json({ message: "Logged out successfully" });
   });
@@ -194,4 +201,11 @@ const isLoggedInMiddleware = (req, res, next) => {
 };
 
 // -- exporting functions
-module.exports = { login, isLoggedIn, isLoggedInMiddleware, logout, isAdmin };
+module.exports = {
+  login,
+  isLoggedIn,
+  isLoggedInMiddleware,
+  logout,
+  isAdmin,
+  decodeToken,
+};
