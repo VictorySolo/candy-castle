@@ -1,6 +1,7 @@
 // -- import modules
 const express = require("express");
 const session = require("express-session");
+const cookieParser = require("cookie-parser");
 const http = require("http");
 require("dotenv").config({ path: "./backend/dist/.env" });
 const cors = require("cors");
@@ -27,6 +28,7 @@ const cartRouter = require("./backend/routes/cartRouter");
 const reviewsRouter = require("./backend/routes/reviewsRouter");
 // -- middleware
 const app = express();
+app.use(cookieParser());
 // -- using the built-in body parser middleware
 app.use(express.json());
 app.use(express.static("./frontend"));

@@ -263,6 +263,9 @@ const updateItemAmount = async (req, res, next) => {
       const existingItemIndex = cart.items.findIndex(
         (item) => item.productId.toString() === productId
       );
+      if (existingItemIndex === -1) {
+        return res.status(404).json({ message: "Product not found in cart" });
+      }
       cart.items[existingItemIndex].amount = amount;
       req.session.cart = cart;
     }

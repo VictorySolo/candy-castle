@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const socket = io();
+    // const socket = io();
 
     // Main content area and buttons
     const mainContent = document.getElementById('main-content');

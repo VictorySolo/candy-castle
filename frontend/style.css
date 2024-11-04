@@ -95,6 +95,22 @@ header {
     background-color: #e3069b;
 }
 
+/* Full star */
+.star-full {
+    color: gold;
+  }
+  
+  /* Half star */
+  .star-half {
+    color: gold;
+  }
+  
+  /* Empty star */
+  .star-empty {
+    color: lightgray;
+  }
+
+  
 /* Shopping Cart */
 #cart {
     display: flex;

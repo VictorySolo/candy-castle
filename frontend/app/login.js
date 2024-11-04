@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.message === "Logged in successfully") {
           await transferCartToDB(cart, data.customerId);
           localStorage.removeItem("cart"); // Clear cart after transfer
-          window.location.href = "cart.html"; // Redirect to cart page
+          window.location.href = "index.html"; // Redirect to cart page
         } else {
           displayError(
             data.message || "Incorrect email or password. Please try again."
