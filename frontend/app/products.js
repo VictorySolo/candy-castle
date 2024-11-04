@@ -49,7 +49,7 @@ function displayProducts(products) {
 
     productCard.innerHTML = `
               <img src="${
-                product.imageUrl || "./images/default-product.png"
+                product.imagePath || "../images/candy-shop.png"
               }" alt="${product.name}" class="product-img">
               <h3 class="product-name">${product.name}</h3>
               <p class="product-description">${product.description}</p>
