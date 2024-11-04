@@ -103,7 +103,45 @@ document.addEventListener("DOMContentLoaded", async () => {
           "order.html?status=error&message=There was an error creating your order. Please try again.";
       }
     });
+
+  // Add reset cart event listener
+  document
+    .getElementById("reset-cart-button")
+    .addEventListener("click", async () => {
+      await resetCart();
+    });
 });
+
+// -- resetting cart
+async function resetCart() {
+  const authResponse = await fetch("/isLoggedIn");
+  const authData = await authResponse.json();
+
+  if (authData.loggedIn) {
+    try {
+      const response = await fetch("/cart/extra", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to reset cart.");
+      }
+
+      await loadCartItems(); // Refresh cart items
+      updateCartCount(); // Update cart count
+    } catch (error) {
+      console.error("Error resetting cart:", error);
+    }
+  } else {
+    localStorage.removeItem("cart");
+
+    displayCartItems(); // Refresh cart items
+    updateCartCount(); // Update cart count
+  }
+}
 
 // Function to check if customer is logged in
 function checkIfLoggedIn() {
@@ -208,6 +246,9 @@ function displayCartItems() {
         <button class="update-button" data-id="${
           item.productId
         }">Update</button>
+        <button class="delete-button" data-id="${
+          item.productId
+        }">Delete</button>
       </td>
     `;
     table.appendChild(row);
@@ -311,6 +352,9 @@ async function loadCartItems() {
           <td>$${(item.price * item.amount).toFixed(2)}</td>
           <td>
             <button class="update-button" data-id="${item.id}">Update</button>
+            <button class="delete-button" data-id="${
+              item.productId
+            }">Delete</button>
           </td>
         `;
         table.appendChild(row);
@@ -342,6 +386,17 @@ function addUpdateButtonListeners() {
         `2. (loadCartItems) productId: ${productId}, newAmount: ${amount}`
       );
       await updateCartItem(productId, amount);
+    });
+  });
+  document.querySelectorAll(".delete-button").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      const button = event.target;
+      const inputElement = button
+        .closest("tr")
+        .querySelector('input[type="number"]');
+      const productId = inputElement.dataset.id;
+      console.log(`2. (loadCartItems) productId: ${productId}`);
+      await deleteCartItem(productId);
     });
   });
 }
@@ -387,5 +442,38 @@ async function updateCartItem(productId, amount) {
     } else {
       console.error("Product not found in cart. Cart:", cart);
     }
+  }
+}
+
+async function deleteCartItem(productId) {
+  const authResponse = await fetch("/isLoggedIn");
+  const authData = await authResponse.json();
+
+  if (authData.loggedIn) {
+    try {
+      const response = await fetch("/cart", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete cart item.");
+      }
+
+      loadCartItems(); // Refresh cart items
+      updateCartCount(); // Update cart count
+    } catch (error) {
+      console.error("Error deleting cart item:", error);
+    }
+  } else {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart = cart.filter((item) => item.productId !== productId);
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    displayCartItems(); // Refresh cart items
+    updateCartCount(); // Update cart count
   }
 }
