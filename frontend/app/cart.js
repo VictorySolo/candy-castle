@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   deliveryAddressInput.name = "deliveryAddress";
   deliveryAddressInput.type = "text";
   deliveryAddressInput.required = true;
+  deliveryAddressInput.style.width = "50%";
   inputContainer.appendChild(deliveryAddressInput);
 
   // Insert the input container above the Create Order button
@@ -38,18 +39,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Make input field visible if logged in
     inputContainer.style.visibility = "visible";
     deliveryAddressInput.required = true; // Make it mandatory
+
+    // Fetch customer information
+    const customerResponse = await fetch("/customers/info");
+    const customerData = await customerResponse.json();
+
+    if (customerData.deliveryAddress) {
+      deliveryAddressInput.value = customerData.deliveryAddress;
+    }
   }
 
   document
     .getElementById("order-button")
     .addEventListener("click", async () => {
       try {
+        const authResponse = await fetch("/isLoggedIn");
+        const authData = await authResponse.json();
+
         if (!authData.loggedIn) {
           window.location.href = "login.html";
           return;
         }
 
-        const deliveryAddress = deliveryAddressInput.value.trim();
+        const deliveryAddress = document
+          .getElementById("delivery-address")
+          .value.trim();
         if (!deliveryAddress) {
           alert("Delivery Address is required.");
           return;
@@ -65,7 +79,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const data = await response.json();
         if (data.status === "success") {
-          window.location.href = `order.html?status=success&orderId=${data.orderId}`;
+          // Pass the entire responseOrder as a URL parameter
+          window.location.href = `order.html?status=success&message=${encodeURIComponent(
+            JSON.stringify(data.order)
+          )}`;
         } else {
           window.location.href = `order.html?status=error&message=${data.message}`;
         }
@@ -148,7 +165,7 @@ async function displayCartItems() {
   // Create table header
   const header = table.createTHead();
   const headerRow = header.insertRow(0);
-  const headers = ["Name", "Amount", "Price", "Cost"];
+  const headers = ["Name", "Amount", "Price", "Cost", "Action"];
   headers.forEach((headerText) => {
     const cell = document.createElement("th");
     cell.innerText = headerText;
@@ -169,7 +186,9 @@ async function displayCartItems() {
       nameCell.innerText = product.name;
 
       const amountCell = row.insertCell(1);
-      amountCell.innerText = item.amount;
+      amountCell.innerHTML = `
+        <input type="number" value="${item.amount}" min="1" data-id="${item.productId}">
+      `;
 
       const priceCell = row.insertCell(2);
       priceCell.innerText = `$${product.price.toFixed(2)}`;
@@ -177,6 +196,11 @@ async function displayCartItems() {
       const costCell = row.insertCell(3);
       const cost = item.amount * product.price;
       costCell.innerText = `$${cost.toFixed(2)}`;
+
+      const actionCell = row.insertCell(4);
+      actionCell.innerHTML = `
+        <button class="update-button" data-id="${item.productId}">Update</button>
+      `;
 
       totalPrice += cost;
     } else {
@@ -187,13 +211,20 @@ async function displayCartItems() {
       nameCell.innerText = `Product ID: ${item.productId}`;
 
       const amountCell = row.insertCell(1);
-      amountCell.innerText = item.amount;
+      amountCell.innerHTML = `
+        <input type="number" value="${item.amount}" min="1" data-id="${item.productId}">
+      `;
 
       const priceCell = row.insertCell(2);
       priceCell.innerText = "N/A";
 
       const costCell = row.insertCell(3);
       costCell.innerText = "N/A";
+
+      const actionCell = row.insertCell(4);
+      actionCell.innerHTML = `
+        <button class="update-button" data-id="${item.productId}">Update</button>
+      `;
     }
   }
 
@@ -204,14 +235,42 @@ async function displayCartItems() {
   totalPriceElement.className = "total-price";
   totalPriceElement.innerText = `Total Price: $${totalPrice.toFixed(2)}`;
   cartItemsContainer.appendChild(totalPriceElement);
+
+  // Add event listeners to update buttons
+  document.querySelectorAll(".update-button").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      const productId = event.target.dataset.id;
+      const inputElement = document.querySelector(
+        `input[data-id='${productId}']`
+      );
+      const newAmount = inputElement.value;
+      await updateCartItem(productId, newAmount);
+    });
+  });
 }
 
-// Function to update the cart count displayed in the header
-function updateCartCount() {
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+// -- Update cart count in the UI
+async function updateCartCount() {
+  const authResponse = await fetch("/isLoggedIn");
+  const authData = await authResponse.json();
+
+  let cart = [];
+
+  if (authData.loggedIn) {
+    const cartResponse = await fetch("/cart");
+    const cartData = await cartResponse.json();
+
+    if (cartData.items) {
+      cart = cartData.items; // Use cart items from DB if logged in
+    }
+  } else {
+    cart = JSON.parse(localStorage.getItem("cart")) || [];
+  }
+
   const cartCount = cart.reduce((total, item) => total + item.amount, 0);
   document.getElementById("cart-count").textContent = cartCount;
 }
+
 // -- checking authentication status function
 async function checkAuthStatus() {
   try {
@@ -239,7 +298,20 @@ async function checkAuthStatus() {
 }
 // -- loading cart items
 async function loadCartItems() {
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const authResponse = await fetch("/isLoggedIn");
+  const authData = await authResponse.json();
+
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  if (authData.loggedIn) {
+    const cartResponse = await fetch("/cart");
+    const cartData = await cartResponse.json();
+
+    if (cartData.items) {
+      cart = cartData.items; // Use cart items from DB if logged in
+    }
+  }
+
   const cartItemsContainer = document.getElementById("cart-items");
   cartItemsContainer.innerHTML = "";
 
@@ -251,38 +323,52 @@ async function loadCartItems() {
   const table = document.createElement("table");
   table.className = "cart-table"; // Apply the existing class
   table.innerHTML = `
-          <tr>
-              <th>Product Name</th>
-              <th>Price</th>
-              <th>Amount</th>
-              <th>Total</th>
-          </tr>
-      `;
+    <tr>
+        <th>Product Name</th>
+        <th>Price</th>
+        <th>Amount</th>
+        <th>Total</th>
+        <th>Action</th>
+    </tr>
+  `;
 
   let totalPrice = 0;
 
   for (const item of cart) {
     try {
-      const response = await fetch(`/products/${item.productId}`);
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch product details for productId ${item.productId}`
-        );
+      // Check if item details are missing and fetch them if needed
+      if (!item.name || !item.price) {
+        const response = await fetch(`/products/${item.productId}`);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch product details for productId ${item.productId}`
+          );
+        }
+        const product = await response.json();
+        item.name = product.name;
+        item.price = product.price;
       }
-
-      const product = await response.json();
 
       const row = document.createElement("tr");
       row.innerHTML = `
-                  <td>${product.name}</td>
-                  <td>$${product.price.toFixed(2)}</td>
-                  <td>${item.amount}</td>
-                  <td>$${(product.price * item.amount).toFixed(2)}</td>
-              `;
+        <td>${item.name}</td>
+        <td>$${item.price.toFixed(2)}</td>
+        <td>
+          <input type="number" value="${item.amount}" min="1" data-id="${
+        item.productId
+      }">
+        </td>
+        <td>$${(item.price * item.amount).toFixed(2)}</td>
+        <td>
+          <button class="update-button" data-id="${
+            item.productId
+          }">Update</button>
+        </td>
+      `;
       table.appendChild(row);
-      totalPrice += product.price * item.amount;
+      totalPrice += item.price * item.amount;
     } catch (error) {
-      console.error("Error fetching product details:", error);
+      console.error("Error processing cart item:", error);
     }
   }
 
@@ -292,4 +378,39 @@ async function loadCartItems() {
   totalPriceElement.className = "total-price"; // Apply the existing class
   totalPriceElement.textContent = `Total Price: $${totalPrice.toFixed(2)}`;
   cartItemsContainer.appendChild(totalPriceElement);
+
+  // Add event listeners to update buttons
+  document.querySelectorAll(".update-button").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      const productId = event.target.dataset.id;
+      const inputElement = document.querySelector(
+        `input[data-id='${productId}']`
+      );
+      const newAmount = inputElement.value;
+      await updateCartItem(productId, newAmount);
+    });
+  });
+}
+
+// -- updating cart item amount
+async function updateCartItem(productId, newAmount) {
+  try {
+    const response = await fetch("/cart", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ productId, amount: newAmount }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update cart item amount.");
+    }
+
+    // Refresh cart items and cart count
+    loadCartItems();
+    updateCartCount();
+  } catch (error) {
+    console.error("Error updating cart item amount:", error);
+  }
 }
