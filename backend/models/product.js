@@ -39,6 +39,10 @@ const productSchema = new Schema({
         type: Number,
         required: [true, "Product price is required"]
     },
+    imagePath: {
+        type: String,
+        required: [true, "Product image is required"]
+    }
     
 })
 
