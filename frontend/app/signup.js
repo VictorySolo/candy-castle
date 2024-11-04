@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (loginData.message === "Logged in successfully") {
           await transferCartToDB(cart, loginData.customerId);
           localStorage.removeItem("cart"); // Clear cart after transfer
-          window.location.href = "cart.html"; // Redirect to cart page
+          window.location.href = "index.html"; // Redirect to index page
         } else {
           displayError(
             loginData.message ||
@@ -116,4 +116,29 @@ function updateCartCount() {
 
 function placeOrder() {
   window.location.href = "order.html";
+}
+
+async function checkAuthStatus() {
+  try {
+    const response = await fetch("/isLoggedIn", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    const authButtons = document.getElementById("auth-buttons");
+
+    if (data.loggedIn) {
+      authButtons.innerHTML = '<button onclick="logout()">Log Out</button>';
+    } else {
+      authButtons.innerHTML = `
+        <a href="/login.html"><button>Login</button></a>
+        <a href="/signup.html"><button>Register</button></a>
+      `;
+    }
+  } catch (error) {
+    console.error("Error checking auth status:", error);
+  }
 }
