@@ -5,20 +5,14 @@ const Review = require("../models/review");
 const getReviews = async (req, res, next) => {
   try {
     // -- getting productId from query parameters
-    const productId = req.query.productId
+    const productId = req.query.productId;
     // -- checking if productId parameter exists
     if (!productId) {
       return res.status(400).json({ message: "Product ID is required" });
     }
     // -- finding reviews for the specified product
     const reviews = await Review.find({ product: productId });
-    // -- if no reviews are found send a message to the client
-    if (!reviews || reviews.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No reviews found for this product" });
-    }
-    // -- OK response to the client with reviews data
+    // -- always return an array (could be empty if no reviews found)
     res.status(200).json(reviews);
   } catch (error) {
     console.log("Error fetching reviews (getReviews)");
