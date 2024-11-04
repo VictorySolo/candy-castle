@@ -62,6 +62,7 @@ const createProduct = async (req, res, next) => {
       availability,
       amount,
       price,
+      imagePath,
     } = req.body;
 
     if (
@@ -73,7 +74,8 @@ const createProduct = async (req, res, next) => {
       !category ||
       !availability ||
       !amount ||
-      !price
+      !price ||
+      !imagePath
     ) {
       return next(new HttpError("Not enough data for creating a product", 400));
     }
@@ -88,6 +90,7 @@ const createProduct = async (req, res, next) => {
       availability,
       amount,
       price,
+      imagePath,
     });
     if (!product) {
       return next(
