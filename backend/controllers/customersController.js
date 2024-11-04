@@ -104,19 +104,38 @@ const creating = async (req, res, next) => {
       );
     }
     // -- returning created customer data
-    res.status(200).json(customer); // probably need to return only a OK messageS
+    res
+      .status(200)
+      .json({ message: "Customer created successfully", customer }); // probably need to return only a OK messageS
   } catch (err) {
     console.log("Error creating a customer (creating)");
     // -- checking for duplicate key error
     if (err.code && err.code === 11000) {
       // -- handling duplicate email error
-      return next(
-        new HttpError(
-          "This email is already registered. Please use a different email.",
-          409
-        )
-      );
+      return res.status(409).json({ message: "Email is already busy" });
     }
+    // -- handling the error
+    next(err);
+  }
+};
+
+// -- get customer by id from token function
+const getId = async (req, res, next) => {
+  try {
+    // -- getting customerId from decoded token
+    const customerId = req.customerId;
+    // -- searching for the customer in the DB
+    const customer = await Customer.findById(customerId);
+
+    // -- if customer is not found
+    if (!customer) {
+      return next(new HttpError("Customer not found", 404));
+    }
+
+    // -- returning the found customer
+    res.status(200).json(customer);
+  } catch (err) {
+    console.log("Error getting customer by ID (getId)");
     // -- handling the error
     next(err);
   }
@@ -353,4 +372,5 @@ module.exports = {
   updating,
   deleting,
   creating,
+  getId,
 };
