@@ -130,6 +130,20 @@ header {
     color: #333;
 }
 
+#reset-cart-button {
+    margin-left: 20px;
+    padding: 5px 10px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  #reset-cart-button:hover {
+    background-color: #ff3333;
+  }
+  
 /* Main Content */
 main {
     padding: 2rem 1rem;
