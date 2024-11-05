@@ -49,27 +49,30 @@ function displayProducts(products) {
   products.forEach((product) => {
     const productCard = document.createElement("div");
     productCard.className = "product-card";
-    // productCard.onclick = () => {
-    //   window.location.href = `product.html?id=${product._id}`;
-    // };
 
     productCard.innerHTML = `
-      <img src="${product.imagePath || "../images/candy-shop.png"}" alt="${
+      <div class="product-info" onclick="viewProductDetails('${product._id}')">
+        <img src="${product.imagePath || "../images/candy-shop.png"}" alt="${
       product.name
     }" class="product-img">
-      <h3 class="product-name">${product.name}</h3>
-      <p class="product-description">${product.description}</p>
-      <div class="product-rating">
-        ${generateRatingStars(product.rating)}
+        <h3 class="product-name">${product.name}</h3>
+        <p class="product-description">${product.description}</p>
+        <div class="product-rating">
+          ${generateRatingStars(product.rating)}
+        </div>
+        <p class="product-price">$${product.price.toFixed(2)}</p>
       </div>
-      <p class="product-price">$${product.price.toFixed(2)}</p>
       <img src="./images/plus.png" alt="Add to Cart" class="add-to-cart-icon" onclick="addToCart('${
         product._id
-      }')">      
+      }')">
     `;
 
     productGrid.appendChild(productCard);
   });
+}
+
+function viewProductDetails(productId) {
+  window.location.href = `product.html?id=${productId}`;
 }
 
 function generateRatingStars(rating) {
@@ -91,21 +94,48 @@ function calculateAverageRating(reviews) {
 }
 
 // -- Add product to cart
-function addToCart(productId) {
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  const existingItemIndex = cart.findIndex(
-    (item) => item.productId === productId
-  );
+async function addToCart(productId) {
+  const authResponse = await fetch("/isLoggedIn");
+  const authData = await authResponse.json();
 
-  if (existingItemIndex >= 0) {
-    cart[existingItemIndex].amount += 1;
+  if (authData.loggedIn) {
+    // If logged in, add to cart in the database
+    try {
+      const response = await fetch("/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId, amount: 1 }), // Add item to the cart with default amount 1
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add product to cart in the DB.");
+      }
+
+      const result = await response.json();
+      console.log(result.message); // Log success message
+      updateCartCount(); // Update cart count after adding
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+    }
   } else {
-    cart.push({ productId, amount: 1 });
-  }
+    // If not logged in, add to cart in the local storage
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const existingItemIndex = cart.findIndex(
+      (item) => item.productId === productId
+    );
 
-  localStorage.setItem("cart", JSON.stringify(cart));
-  updateCartCount();
-  displayCartItems(); // -- Update the cart view after adding an item
+    if (existingItemIndex >= 0) {
+      cart[existingItemIndex].amount += 1;
+    } else {
+      cart.push({ productId, amount: 1 });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartCount();
+    displayCartItems(); // -- Update the cart view after adding an item
+  }
 }
 
 // -- Update cart count in the UI
@@ -146,9 +176,9 @@ function displayCartItems() {
     cartItem.className = "cart-item";
 
     cartItem.innerHTML = `
-              <p>Product ID: ${item.productId}</p>
-              <p>Amount: ${item.amount}</p>
-          `;
+      <p>Product ID: ${item.productId}</p>
+      <p>Amount: ${item.amount}</p>
+    `;
 
     cartItemsContainer.appendChild(cartItem);
   });
