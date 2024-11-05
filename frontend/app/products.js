@@ -32,8 +32,11 @@ async function fetchProducts() {
         product.rating = 0; // Default rating if reviews fetch fails or no reviews found
       }
     }
-
-    displayProducts(products);
+    // -- filtering out unavailable products
+    const availableProducts = products.filter(
+      (product) => product.availability
+    );
+    displayProducts(availableProducts);
   } catch (error) {
     console.error("Error fetching products:", error);
   }
