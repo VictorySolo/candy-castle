@@ -49,9 +49,9 @@ function displayProducts(products) {
   products.forEach((product) => {
     const productCard = document.createElement("div");
     productCard.className = "product-card";
-    productCard.onclick = () => {
-      window.location.href = `product.html?id=${product._id}`;
-    };
+    // productCard.onclick = () => {
+    //   window.location.href = `product.html?id=${product._id}`;
+    // };
 
     productCard.innerHTML = `
       <img src="${product.imagePath || "../images/candy-shop.png"}" alt="${
@@ -63,6 +63,9 @@ function displayProducts(products) {
         ${generateRatingStars(product.rating)}
       </div>
       <p class="product-price">$${product.price.toFixed(2)}</p>
+      <img src="./images/plus.png" alt="Add to Cart" class="add-to-cart-icon" onclick="addToCart('${
+        product._id
+      }')">      
     `;
 
     productGrid.appendChild(productCard);
