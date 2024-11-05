@@ -49,21 +49,21 @@ function displayProducts(products) {
   products.forEach((product) => {
     const productCard = document.createElement("div");
     productCard.className = "product-card";
+    productCard.onclick = () => {
+      window.location.href = `product.html?id=${product._id}`;
+    };
 
     productCard.innerHTML = `
-              <img src="${
-                product.imagePath || "../images/candy-shop.png"
-              }" alt="${product.name}" class="product-img">
-              <h3 class="product-name">${product.name}</h3>
-              <p class="product-description">${product.description}</p>
-              <div class="product-rating">
-                  ${generateRatingStars(product.rating)}
-              </div>
-              <p class="product-price">$${product.price.toFixed(2)}</p>
-              <img src="./images/plus.png" alt="Add to Cart" class="add-to-cart-icon" onclick="addToCart('${
-                product._id
-              }')">
-          `;
+      <img src="${product.imagePath || "../images/candy-shop.png"}" alt="${
+      product.name
+    }" class="product-img">
+      <h3 class="product-name">${product.name}</h3>
+      <p class="product-description">${product.description}</p>
+      <div class="product-rating">
+        ${generateRatingStars(product.rating)}
+      </div>
+      <p class="product-price">$${product.price.toFixed(2)}</p>
+    `;
 
     productGrid.appendChild(productCard);
   });
