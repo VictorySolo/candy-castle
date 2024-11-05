@@ -45,6 +45,7 @@ const createReview = async (req, res, next) => {
       // -- update the existing review
       existingReview.comment = comment;
       existingReview.rating = rating;
+      existingReview.date = new Date(); // Add the current date
       await existingReview.save();
 
       return res.status(200).json({
@@ -55,6 +56,7 @@ const createReview = async (req, res, next) => {
 
     // -- creating new review in the database
     const newReview = await Review.create({
+      date: new Date(), // Add the current date
       product: productId,
       comment,
       rating,
@@ -103,6 +105,7 @@ const updateReview = async (req, res, next) => {
     // -- updating the review fields
     review.comment = comment;
     review.rating = rating;
+    review.date = new Date(); // Add the current date
     await review.save();
 
     // -- returning updated review
