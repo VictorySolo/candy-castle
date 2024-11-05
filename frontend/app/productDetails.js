@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await fetchProductReviews(productId);
   }
   updateCartCount();
+  await checkAuthStatus(productId); // Check authentication status and display "Write a Review" button if logged in
 });
 
 async function fetchProductDetails(productId) {
@@ -36,7 +37,7 @@ async function fetchProductReviews(productId) {
   }
 }
 
-function displayProductDetails(product) {
+async function displayProductDetails(product) {
   const productDetailsSection = document.getElementById("product-details");
   productDetailsSection.innerHTML = `
       <div class="product-detail-card">
@@ -51,13 +52,31 @@ function displayProductDetails(product) {
         <p class="product-detail-weight">Weight: ${product.weight}g</p>
         <p class="product-detail-energy">Energy: ${product.energy} kcal</p>
         <p class="product-detail-price">$${product.price.toFixed(2)}</p>
+        <p class="product-detail-amount">Amount available: ${product.amount}</p>
         <button onclick="addToCart('${product._id}')">Add to Cart</button>
+        <div id="write-review-button-container"></div>
       </div>
       <h3>Reviews</h3>
       <div id="reviews-section">
         <!-- Reviews will be injected here by JavaScript -->
       </div>
     `;
+
+  const authResponse = await fetch("/isLoggedIn");
+  const authData = await authResponse.json();
+  console.log("User Logged In:", authData.loggedIn);
+
+  if (authData.loggedIn) {
+    const writeReviewButtonContainer = document.getElementById(
+      "write-review-button-container"
+    );
+    const writeReviewButton = document.createElement("button");
+    writeReviewButton.textContent = "Write a Review";
+    writeReviewButton.onclick = () => {
+      window.location.href = `review.html?productId=${product._id}`;
+    };
+    writeReviewButtonContainer.appendChild(writeReviewButton);
+  }
 }
 
 function displayProductReviews(reviews) {
@@ -83,20 +102,30 @@ function displayProductReviews(reviews) {
   });
 }
 
-// -- Add product to cart
+async function checkAuthStatus(productId) {
+  const authResponse = await fetch("/isLoggedIn");
+  const authData = await authResponse.json();
+
+  if (authData.loggedIn) {
+    const writeReviewButtonContainer = document.getElementById(
+      "write-review-button-container"
+    );
+    writeReviewButtonContainer.innerHTML = `<button onclick="location.href='review.html?productId=${productId}'">Write a Review</button>`;
+  }
+}
+
 async function addToCart(productId) {
   const authResponse = await fetch("/isLoggedIn");
   const authData = await authResponse.json();
 
   if (authData.loggedIn) {
-    // If logged in, add to cart in the database
     try {
       const response = await fetch("/cart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ productId, amount: 1 }), // Add item to the cart with default amount 1
+        body: JSON.stringify({ productId, amount: 1 }),
       });
 
       if (!response.ok) {
@@ -110,7 +139,6 @@ async function addToCart(productId) {
       console.error("Error adding product to cart:", error);
     }
   } else {
-    // If not logged in, add to cart in the local storage
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     const existingItemIndex = cart.findIndex(
       (item) => item.productId === productId
