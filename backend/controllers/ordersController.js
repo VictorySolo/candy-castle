@@ -77,13 +77,11 @@ const createNewOrder = async (req, res, next) => {
     res.status(201).json({ status: "success", order: responseOrder });
   } catch (error) {
     console.error("Error creating order:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        message: "Failed to create order",
-        error: error.message,
-      });
+    res.status(500).json({
+      status: "error",
+      message: "Failed to create order",
+      error: error.message,
+    });
   }
 };
 
@@ -93,7 +91,8 @@ const cancelOrder = async (req, res, next) => {
     // -- getting orderId from request
     const orderId = req.params.id;
     // -- looking for the order by ID
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId).populate("products.product");
+
     // -- if order doesn't exist send a message to client
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -118,6 +117,17 @@ const cancelOrder = async (req, res, next) => {
         .json({ message: "Forbidden: You can only cancel your own orders" });
     }
 
+    // -- updating product amounts
+    for (const item of order.products) {
+      const product = await Product.findById(item.product._id);
+      if (product) {
+        product.amount += item.amount;
+        // -- this line should be discussed with the owner of the candy-store
+        product.availability = true;
+        await product.save();
+      }
+    }
+
     // -- getting customerId from the order
     const customerId = order.customer;
     // -- removing the order from the customer's order list
@@ -135,6 +145,7 @@ const cancelOrder = async (req, res, next) => {
     next(error);
   }
 };
+
 // -- exporting all functions
 module.exports = {
   createNewOrder,
