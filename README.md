@@ -30,22 +30,107 @@ Here's the file structure of the **Candy Castle** project:
 - **backend/services**: Services including authentication services.
 - **frontend**: JavaScript and HTML for client-side logic and presentation
 
+## Prerequisites
+
+- **Node.js** (version 14 or higher) - Download from `nodejs.org`
+- **npm** (Node Package Manager), which is included with Node.js
+- **MongoDB** installed and running on your local machine or hosted in the cloud (e.g., MongoDB Atlas)
+
 ## Setup Instructions
-**1. Clone the repository:**
+
+**Clone the repository:**
 ```bash
 
 git clone https://github.com/VictorySolo/candy-castle.git
-```
-**2. Install dependencies:**
-```bash
 
 cd candy-castle
-npm install
+
 ```
-**3. Environment Setup:**
+**Install dependencies:**
+1.```bcrypt```
+
+Used to securely hash passwords
+```bash
+
+npm install bcrypt
+
+```
+2. ```cookie-parser```
+
+Allows parsing of cookies in the applicatio
+```bash
+
+npm install cookie-parser
+
+```
+3. ```cors```
+
+Enables Cross-Origin Resource Sharing, allowing the app to communicate with resources on different origins
+```bash
+
+npm install cors
+
+```
+4. ```dotenv```
+
+Loads environment variables from a .env file, keeping sensitive data like database credentials out of the source code
+```bash
+
+npm install dotenv
+
+```
+5. ```express```
+
+A fast web framework for building the server and handling requests and responses
+```bash
+
+npm install express
+
+```
+6. ```express-session```
+
+A fast web framework for building the server and handling requests and responses
+```bash
+
+npm install express-session
+
+```
+7. ```helmet```
+
+Provides security for your Express app by setting various HTTP headers
+```bash
+
+npm install helmet
+
+```
+8. ```http-server```
+
+A simple, zero-configuration command-line HTTP server, useful for serving static files in development
+```bash
+
+npm install http-server
+
+```
+9. ```jsonwebtoken```
+
+Used for generating and verifying JSON Web Tokens (JWT) for secure data exchange
+```bash
+
+npm install jsonwebtoken
+
+```
+10. ```mongoose```
+
+Connects to MongoDB and provides a schema-based solution to model your data
+```bash
+
+npm install mongoose
+
+```
+**Environment Setup:**
 - Create a ```.env``` file to store environment variables, including MongoDB URI, JWT secret, etc.
 - Example:
-```env
+```plaintext
 
 MONGO_URI=your_mongo_database_uri
 PORT=your_local_host_path
@@ -53,12 +138,12 @@ SALT_ROUNDS=your_amount_of_a_salt_rounds
 SECRET_KEY=your_secret_key 
 SESSION_SECRET=your_session_secret_key
 ```
-**4. Start the Server:**
+**Start the Application:**
 ```bash
 
 npm start
 ```
-**5. Access the App:**
+**Access the App:**
 
 - Open your browser and navigate to ```http://localhost:3000```.
 
