@@ -47,6 +47,7 @@ cd candy-castle
 
 ```
 **Install dependencies:**
+
 1.```bcrypt```
 
 Used to securely hash passwords
