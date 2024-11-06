@@ -108,12 +108,15 @@ const createToken = async (req, res, next) => {
   }
 };
 // -- isLoggedIn middleware
-const isLoggedIn = (req, res, next) => {
+const isLoggedIn = async (req, res, next) => {
   // -- checking if the customerId is present in the session
+  let isAdmin = false;
   if (req.session.customerId) {
-    res.status(200).json({ loggedIn: true });
+    const customer = await Customer.findById(req.session.customerId);
+    isAdmin = customer ? customer.isAdmin : false;
+    res.status(200).json({ loggedIn: true, isAdmin });
   } else {
-    res.status(200).json({ loggedIn: false });
+    res.status(200).json({ loggedIn: false, isAdmin });
   }
   // if (req.session.customerId) {
   //   next();
