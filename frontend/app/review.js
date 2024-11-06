@@ -1,7 +1,26 @@
+// Function to get the JWT token from the cookie
+function getCustomerIdFromToken() {
+  const cookieName = "Ticket=";
+  const cookies = document.cookie.split(";");
+
+  for (let cookie of cookies) {
+    while (cookie.charAt(0) === " ") {
+      cookie = cookie.substring(1);
+    }
+    if (cookie.indexOf(cookieName) === 0) {
+      const token = cookie.substring(cookieName.length, cookie.length);
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      return decodedToken._id;
+    }
+  }
+  return null;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM fully loaded and parsed");
   const urlParams = new URLSearchParams(window.location.search);
   const productId = urlParams.get("productId");
+  const customerId = getCustomerIdFromToken();
 
   if (productId) {
     // Pre-fill product information or other necessary fields if needed
@@ -19,7 +38,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (response.ok) {
         const reviews = await response.json();
         if (reviews.length > 0) {
-          const existingReview = reviews[0];
+          const existingReview = reviews.find(
+            (review) => review.customer === customerId
+          );
           document.getElementById("rating").value = existingReview.rating;
           document.getElementById("comment").value = existingReview.comment;
           console.log("Existing review pre-filled:", existingReview);
