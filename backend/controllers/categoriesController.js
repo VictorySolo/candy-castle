@@ -4,12 +4,12 @@ const Category = require("../models/category");
 const Product = require("../models/product");
 const HttpError = require("../services/HttpError");
 
-//GET - get all gategories with related products
+//GET - get all categories with related products
 const gettingAll = async (req, res, next) => {
   try {
     const categories = await Category.find();
     if (!categories || categories.length === 0) {
-      return next(new HttpError("No products found", 404));
+      return next(new HttpError("No category found", 404));
     }
     res.status(200).json(categories);
   } catch (err) {
@@ -42,7 +42,7 @@ const createCategory = async (req, res, next) => {
     });
     if (!category) {
       return next(
-        new HttpError("A problem occured while creating a product", 500)
+        new HttpError("A problem occured while creating a category", 500)
       );
     }
     res.status(201).json(category);
@@ -51,13 +51,13 @@ const createCategory = async (req, res, next) => {
   }
 };
 
-//GET - get a single category by name and related products
+//GET - get a single category by Id and related products
 const getCategoryById = async (req, res, next) => {
   try {
     const id = req.params.id;
     const category = await Category.findById(id).populate("products");
     if (!category) {
-      return next(new HttpError("Couldn't find the cutegory", 404));
+      return next(new HttpError("Couldn't find the category", 404));
     }
     res.status(200).json(category);
   } catch (err) {
