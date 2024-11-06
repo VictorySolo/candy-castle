@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <!-- Logo -->
+            <div id="logo">
+                <a href="/">
+                    <img src="./images/logo.png" alt="Candy Castle Logo">
+                </a>
+                <h1 class="site-name">Candy Castle</h1>
+            </div>
+
+            <!-- Navigation menu -->
+            <nav id="navigation">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li id="categories-menu" style="display: list-item;"><a href="/categories.html">Categories</a></li>
+                    <li><a href="/contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <!-- Auth Buttons -->
+            <div id="auth-buttons"></div>
+
+            <!-- Shopping Cart -->
+            <div id="cart">
+                <a href="cart.html">
+                    <img src="./images/candy-shop.png" alt="Shopping Cart Icon">
+                    <span id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <section id="category-section">
+            <h2>Categories</h2>
+            <div id="category-list"></div>
+            <button id="create-category-btn" style="display: none;">Create Category</button>
+        </section>
+
+        <!-- Hidden Category Form -->
+        <section id="category-form-section" style="display: none;">
+            <form id="category-form">
+                <label for="category-name">Name:</label>
+                <input type="text" id="category-name" name="name" required>
+                <label for="category-description">Description:</label>
+                <textarea id="category-description" name="description" required></textarea>
+                <button type="submit" id="category-submit-btn">Submit</button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <!-- Contact Information -->
+            <div class="footer-contact">
+                <h3>Contact Us</h3>
+                <p>Email: support@candycastle.com</p>
+                <p>Phone: +972 (055) 123-4567</p>
+                <p>Address: 123 Sweet St, Candy City, Israel</p>
+            </div>
+
+            <!-- Copyright -->
+            <div class="footer-copyright">
+                <p>&copy; 2024 Candy Castle. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="./app/categories.js"></script>
+    <script src="./app/authentication.js"></script>
+</body>
+
+</html>
