@@ -317,7 +317,7 @@ const getCartItems = async (req, res, next) => {
     }
 
     // -- if the cart exists getting sending all the cart items to the client
-    if (cart) {
+    if (cart && cart.items.length > 0) {
       const filteredItems = cart.items.map((item) => ({
         id: item.productId._id,
         name: item.productId.name,
@@ -341,7 +341,9 @@ const getCartItems = async (req, res, next) => {
       res.status(200).json(responseCart);
     } else {
       // -- the cart is empty response to the client
-      res.status(404).json({ message: "Cart is empty" });
+      // res.status(404).json({ message: "Cart is empty" });
+      // -- Return empty cart with 200 status
+      res.status(200).json({ items: [], totalPrice: 0 });
     }
   } catch (error) {
     console.log("Error retrieving cart items (getCartItems)");
