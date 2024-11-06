@@ -4,12 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Candy Castle</title>
+    <title>Categories</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
     <!-- Header -->
     <header>
         <div class="header-container">
@@ -25,8 +24,8 @@
             <nav id="navigation">
                 <ul>
                     <li><a href="/">Home</a></li>
-                    <li id="categories-menu" style="display: none;"><a href="/categories.html">Categories</a></li> <!-- Hidden by default -->
-                    <li><a href="/contact">Contact</a></li>
+                    <li id="categories-menu" style="display: list-item;"><a href="/categories.html">Categories</a></li>
+                    <li><a href="/contact.html">Contact</a></li>
                 </ul>
             </nav>
             <!-- Auth Buttons -->
@@ -44,22 +43,23 @@
 
     <!-- Main Content -->
     <main>
-        <section id="main-content">
-            <h1>Welcome to Candy Castle!</h1>
-            <p>Explore our wide selection of sweets and candies!</p>
-
-            <!-- Product Grid -->
-            <div id="product-grid" class="product-grid">
-                <!-- Products will be injected here by JavaScript -->
-            </div>
-
-            <!-- Registration Form (hidden by default) -->
-            <div id="form-container" style="display: none;">
-                <h2>Register</h2>
-                <!-- Form content will be dynamically inserted here -->
-            </div>
+        <section id="category-section">
+            <h2>Categories</h2>
+            <div id="category-list"></div>
+            <button id="create-category-btn" style="display: none;">Create Category</button>
         </section>
 
+        <!-- Hidden Category Form -->
+        <section id="category-form-section" style="display: none;">
+            <form id="category-form">
+                <label for="category-name">Name:</label>
+                <input type="text" id="category-name" name="name" required>
+                <label for="category-description">Description:</label>
+                <textarea id="category-description" name="description" required></textarea>
+                <button type="submit" id="category-submit-btn">Submit</button>
+            </form>
+        </section>
+    </main>
 
     <!-- Footer -->
     <footer>
@@ -78,9 +78,9 @@
             </div>
         </div>
     </footer>
-    <script src="./app/app.js"></script>
-    <script src="./app/products.js"></script> <!-- Adding new script for products -->
-    <script src="./app/authentication.js"></script> <!-- login, log out, register buttons -->
+    
+    <script src="./app/categories.js"></script>
+    <script src="./app/authentication.js"></script>
 </body>
 
 </html>
