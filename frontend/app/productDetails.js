@@ -156,6 +156,7 @@ async function addToCart(productId) {
   }
 }
 
+// -- Update cart count in the UI
 async function updateCartCount() {
   const authResponse = await fetch("/isLoggedIn");
   const authData = await authResponse.json();
@@ -163,11 +164,21 @@ async function updateCartCount() {
   let cart = [];
 
   if (authData.loggedIn) {
-    const cartResponse = await fetch("/cart");
-    const cartData = await cartResponse.json();
-
-    if (cartData.items) {
-      cart = cartData.items; // Use cart items from DB if logged in
+    try {
+      const cartResponse = await fetch("/cart");
+      if (cartResponse.status === 200) {
+        const cartData = await cartResponse.json();
+        if (cartData.items) {
+          cart = cartData.items; // Use cart items from DB if logged in
+        }
+      } else if (cartResponse.status === 404) {
+        // Handle case where cart is not found
+        console.log("No cart found for the user.");
+      } else {
+        console.error("Failed to fetch cart data:", cartResponse.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching cart data:", error);
     }
   } else {
     cart = JSON.parse(localStorage.getItem("cart")) || [];
